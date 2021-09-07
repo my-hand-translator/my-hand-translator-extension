@@ -8,10 +8,12 @@ const PARAMS = {
   },
   CODE: "code",
   SELECT_ACCOUNT: "select_account",
+  AUTHORIZATION_CODE: "authorization_code",
 };
 
 const URLS = {
   GOOGLE_AUTH: "https://accounts.google.com/o/oauth2/v2/auth",
+  TOKEN: "https://accounts.google.com/o/oauth2/token",
 };
 
 export { PARAMS, URLS };

@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { styled } from "../config/stitches.config";
-import { PARAMS, URLS } from "../constants/auth";
+import { URLS } from "../constants/auth";
+import {
+  createOAuthParams,
+  createTokenParams,
+  getAccessToken,
+} from "../services/loginService";
 
 const HeaderStyled = styled("h1", {
   fontSize: "3rem",
@@ -55,7 +60,7 @@ export default function Login() {
   const [isEnrolled, setIsEnrolled] = useState(false);
 
   useEffect(() => {
-    chrome.storage.sync.get(["formData"], result => {
+    chrome.storage.sync.get(["formData"], (result) => {
       if (result.formData) {
         setFormData(result.formData);
         setIsEnrolled(true);
@@ -70,23 +75,23 @@ export default function Login() {
   };
 
   const handleLoginClick = () => {
-    const scope = `${PARAMS.SCOPES.PROFILE} ${PARAMS.SCOPES.EMAIL} ${PARAMS.SCOPES.CLOUD_PLATFORM} ${PARAMS.SCOPES.CLOUD_TRANSLATION} ${PARAMS.SCOPES.DEV_STORAGE}`;
-
-    const config = {
-      client_id: formData.clientId,
-      redirect_uri: formData.redirectURI,
-      scope,
-      response_type: PARAMS.CODE,
-      prompt: PARAMS.SELECT_ACCOUNT,
-    };
-
-    const params = new URLSearchParams(config).toString();
-    const url = `${URLS.GOOGLE_AUTH}?${params}`;
+    const oAuthParams = createOAuthParams(formData);
+    const url = `${URLS.GOOGLE_AUTH}?${oAuthParams}`;
 
     chrome.identity.launchWebAuthFlow(
       { url, interactive: true },
-      redirectURL => {
-        const code = redirectURL.split("code=")[1].split("&")[0];
+      async (redirectURL) => {
+        const responseURL = new URL(redirectURL);
+        const code = responseURL.searchParams.get("code");
+
+        const tokenParams = createTokenParams(formData, code);
+        const tokenURL = `${URLS.TOKEN}?${tokenParams}&redirect_uri=${formData.redirectURI}&code=${code}`;
+
+        const accessToken = await getAccessToken(tokenURL);
+
+        if (accessToken) {
+          chrome.storage.sync.set({ accessToken });
+        }
       },
     );
   };
