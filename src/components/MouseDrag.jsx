@@ -13,11 +13,7 @@ const styles = {
 };
 
 function MouseDrag() {
-  return (
-    <div style={styles.main}>
-      <h1>Mouse Drag</h1>
-    </div>
-  );
+  return <div style={styles.main} />;
 }
 
 export default MouseDrag;
