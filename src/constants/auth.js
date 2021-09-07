@@ -9,6 +9,7 @@ const PARAMS = {
   CODE: "code",
   SELECT_ACCOUNT: "select_account",
   AUTHORIZATION_CODE: "authorization_code",
+  OFFLINE: "offline",
 };
 
 const URLS = {

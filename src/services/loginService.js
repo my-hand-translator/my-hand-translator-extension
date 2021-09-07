@@ -8,7 +8,8 @@ const createOAuthParams = (oAuthData) => {
     redirect_uri: oAuthData.redirectURI,
     scope,
     response_type: PARAMS.CODE,
-    prompt: PARAMS.SELECT_ACCOUNT,
+    prompt: "consent",
+    access_type: PARAMS.OFFLINE,
   };
 
   return new URLSearchParams(config).toString();
@@ -24,7 +25,7 @@ const createTokenParams = (oAuthData) => {
   return new URLSearchParams(config).toString();
 };
 
-const getAccessToken = async (url) => {
+const getTokens = async (url) => {
   const response = await fetch(url, {
     method: "POST",
     headers: {
@@ -32,9 +33,13 @@ const getAccessToken = async (url) => {
     },
   });
 
-  const data = await response.json();
+  const { access_token: accessToken, refresh_token: refreshToken } =
+    await response.json();
 
-  return data.access_token;
+  return {
+    accessToken,
+    refreshToken,
+  };
 };
 
-export { createOAuthParams, createTokenParams, getAccessToken };
+export { createOAuthParams, createTokenParams, getTokens };

@@ -19,7 +19,4 @@ export const {
       black: "#737373",
     },
   },
-  utils: {
-    marginX: value => ({ marginLeft: value, marginRight: value }),
-  },
 });

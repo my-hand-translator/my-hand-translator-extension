@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
+
+import ButtonStyled from "./Button";
 import { styled } from "../config/stitches.config";
 import { URLS } from "../constants/auth";
+
 import {
   createOAuthParams,
   createTokenParams,
-  getAccessToken,
+  getTokens,
 } from "../services/loginService";
 
 const HeaderStyled = styled("h1", {
@@ -24,30 +27,6 @@ const FormStyled = styled("div", {
 
   "& button": {
     marginTop: "10px",
-  },
-});
-
-const ButtonStyled = styled("button", {
-  color: "white",
-  fontWeight: "bold",
-  fontSize: "1rem",
-  boxShadow: "0 2px 10px rgba(0, 0, 0, 0.2)",
-  border: "none",
-  outline: "none",
-  borderRadius: "4px",
-  background: "$lightBlue",
-
-  variants: {
-    size: {
-      small: {
-        width: "60px",
-        height: "30px",
-      },
-      middle: {
-        width: "130px",
-        height: "60px",
-      },
-    },
   },
 });
 
@@ -87,10 +66,10 @@ export default function Login() {
         const tokenParams = createTokenParams(formData, code);
         const tokenURL = `${URLS.TOKEN}?${tokenParams}&redirect_uri=${formData.redirectURI}&code=${code}`;
 
-        const accessToken = await getAccessToken(tokenURL);
+        const tokens = await getTokens(tokenURL);
 
-        if (accessToken) {
-          chrome.storage.sync.set({ accessToken });
+        if (tokens) {
+          chrome.storage.sync.set({ tokens });
         }
       },
     );

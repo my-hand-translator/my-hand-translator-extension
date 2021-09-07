@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Login from "./Login";
 import { styled } from "../config/stitches.config";
 
@@ -12,6 +12,12 @@ const LoginStyled = styled("div", {
 });
 
 export default function Popup() {
+  useEffect(() => {
+    chrome.storage.sync.get(["tokens"], (result) => {
+      console.log(result.tokens);
+    });
+  }, []);
+
   return (
     <LoginStyled>
       <Login />
