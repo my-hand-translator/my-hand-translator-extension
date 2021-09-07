@@ -8,7 +8,7 @@ const createOAuthParams = (oAuthData) => {
     redirect_uri: oAuthData.redirectURI,
     scope,
     response_type: PARAMS.CODE,
-    prompt: "consent",
+    prompt: PARAMS.CONSENT,
     access_type: PARAMS.OFFLINE,
   };
 
@@ -26,20 +26,24 @@ const createTokenParams = (oAuthData) => {
 };
 
 const getTokens = async (url) => {
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
-  const { access_token: accessToken, refresh_token: refreshToken } =
-    await response.json();
+    const { access_token: accessToken, refresh_token: refreshToken } =
+      await response.json();
 
-  return {
-    accessToken,
-    refreshToken,
-  };
+    return {
+      accessToken,
+      refreshToken,
+    };
+  } catch (err) {
+    throw new Error(err);
+  }
 };
 
 export { createOAuthParams, createTokenParams, getTokens };

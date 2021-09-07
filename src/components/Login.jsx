@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 
 import ButtonStyled from "./Button";
+import ErrorStyled from "./Error";
+
 import { styled } from "../config/stitches.config";
 import { URLS } from "../constants/auth";
 
@@ -14,19 +16,19 @@ const HeaderStyled = styled("h1", {
   fontSize: "3rem",
 });
 
-const FormStyled = styled("div", {
+const FormStyled = styled("form", {
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
   flexDirection: "column",
-  marginBottom: "30px",
+  marginBottom: "1em",
 
   "& input": {
-    marginBottom: "5px",
+    marginBottom: "0.5em",
   },
 
   "& button": {
-    marginTop: "10px",
+    marginTop: "0.5em",
   },
 });
 
@@ -36,10 +38,15 @@ export default function Login() {
     redirectURI: "",
     clientSecret: "",
   });
+  const [error, setError] = useState();
   const [isEnrolled, setIsEnrolled] = useState(false);
 
   useEffect(() => {
     chrome.storage.sync.get(["formData"], (result) => {
+      if (chrome.runtime.lastError) {
+        setError(chrome.runtime.lastError.message);
+      }
+
       if (result.formData) {
         setFormData(result.formData);
         setIsEnrolled(true);
@@ -66,10 +73,14 @@ export default function Login() {
         const tokenParams = createTokenParams(formData, code);
         const tokenURL = `${URLS.TOKEN}?${tokenParams}&redirect_uri=${formData.redirectURI}&code=${code}`;
 
-        const tokens = await getTokens(tokenURL);
+        try {
+          const tokens = await getTokens(tokenURL);
 
-        if (tokens) {
-          chrome.storage.sync.set({ tokens });
+          if (tokens) {
+            chrome.storage.sync.set({ tokens });
+          }
+        } catch (err) {
+          setError(err.message);
         }
       },
     );
@@ -121,6 +132,7 @@ export default function Login() {
       >
         Google Login
       </ButtonStyled>
+      {error && <ErrorStyled>{error}</ErrorStyled>}
     </>
   );
 }

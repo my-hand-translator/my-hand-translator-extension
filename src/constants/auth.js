@@ -7,7 +7,7 @@ const PARAMS = {
     DEV_STORAGE: "https://www.googleapis.com/auth/devstorage.full_control",
   },
   CODE: "code",
-  SELECT_ACCOUNT: "select_account",
+  CONSENT: "consent",
   AUTHORIZATION_CODE: "authorization_code",
   OFFLINE: "offline",
 };
