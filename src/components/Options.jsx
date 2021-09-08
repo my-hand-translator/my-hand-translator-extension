@@ -1,6 +1,6 @@
 import React from "react";
 import {
-  BrowserRouter as Router,
+  HashRouter as Router,
   Switch,
   Route,
   Link,
@@ -9,39 +9,43 @@ import {
 
 import Popup from "./Popup";
 
-const styles = {
-  container: {
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-};
-
 function Options() {
   return (
     <Router>
-      <div style={styles.container}>
-        <h1>Options</h1>
-        <nav>
-          <ul>
-            <li>
-              <Link to="/">Options</Link>
-            </li>
-            <li>
-              <Link to="/popup">Popup</Link>
-            </li>
-          </ul>
-        </nav>
-        <Switch>
-          <Route exact path="/">
-            <Redirect to="/options.html" />
-          </Route>
-          <Route exact path="/popup">
-            <Popup />
-          </Route>
-        </Switch>
-      </div>
+      <h1>Options</h1>
+      <nav>
+        <ul>
+          <li>
+            <Link to="/">Options</Link>
+          </li>
+          <li>
+            <Link to="/my-glossary">My Glossary</Link>
+          </li>
+          <li>
+            <Link to="/my-translations">My Translations</Link>
+          </li>
+          <li>
+            <Link to="/other-glossaries">Other Glossaries</Link>
+          </li>
+        </ul>
+      </nav>
+      <Switch>
+        <Route exact path="/">
+          <Redirect to="/options.html" />
+        </Route>
+        <Route exact path="/popup">
+          <Popup />
+        </Route>
+        <Route exact path="/my-glossary">
+          <div>My Glossary</div>
+        </Route>
+        <Route exact path="/my-translations">
+          <div>My Translations</div>
+        </Route>
+        <Route exact path="/other-glossaries">
+          <div>Other Glossaries</div>
+        </Route>
+      </Switch>
     </Router>
   );
 }

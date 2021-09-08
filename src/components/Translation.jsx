@@ -29,18 +29,19 @@ const Textarea = styled("textarea", {
   },
 });
 
-export default function Translation({ handleChangeTextInput, textInput }) {
+export default function Translation({ handleTranslate, textInput }) {
   return (
     <ContainerStyled flex="column" border="black">
-      <ContainerStyled flex="column">
-        <SubTitle>번역할 문장</SubTitle>
-        <Textarea
-          boxType="translation"
-          type="text"
-          placeholder="번역할 문장을 입력해주세요."
-          onChange={handleChangeTextInput}
-        />
-      </ContainerStyled>
+      <form onSubmit={handleTranslate}>
+        <ContainerStyled flex="column">
+          <SubTitle>번역할 문장</SubTitle>
+          <Textarea
+            boxType="translation"
+            type="text"
+            placeholder="번역할 문장을 입력해주세요."
+          />
+        </ContainerStyled>
+      </form>
       <ContainerStyled flex="column">
         <SubTitle>번역 결과</SubTitle>
         <SubTitle>이 번역은 000에 의해 번역된 결과입니다.</SubTitle>
@@ -54,7 +55,7 @@ export default function Translation({ handleChangeTextInput, textInput }) {
 
 Translation.propTypes = {
   textInput: PropTypes.string,
-  handleChangeTextInput: PropTypes.func.isRequired,
+  handleTranslate: PropTypes.func.isRequired,
 };
 
 Translation.defaultProps = {
