@@ -17,6 +17,7 @@ export const {
       apricot: "#F2B988",
       white: "#f2f2f2",
       black: "#737373",
+      red: "#EA4435",
     },
   },
 });
