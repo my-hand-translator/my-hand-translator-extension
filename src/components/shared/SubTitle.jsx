@@ -2,7 +2,8 @@ import { styled } from "@stitches/react";
 
 const SubTitle = styled("h3", {
   color: "$black",
-  fontSize: "15px",
+  fontSize: "20px",
+  marginTop: "10px",
   marginBottom: "10px",
 
   variants: {
@@ -11,6 +12,12 @@ const SubTitle = styled("h3", {
       lightBlue: { color: "$lightBlue" },
       apricot: { color: "$apricot" },
       white: { color: "$white" },
+    },
+
+    fontSize: {
+      big: { fontSize: "30px" },
+      middle: { fontSize: "20px" },
+      small: { fontSize: "10px" },
     },
 
     align: {
