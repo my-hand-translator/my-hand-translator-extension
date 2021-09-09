@@ -97,7 +97,7 @@ export default function Popup() {
   };
 
   const handleClickTranslation = () => {
-    console.log("click translate", originText);
+    // 번역
   };
 
   const handleClickOptionButton = ({ target: { name } }) => {

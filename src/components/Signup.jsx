@@ -23,8 +23,10 @@ export default function Signup({ handleSignupResult }) {
         return setError(chrome.runtime.lastError.message);
       }
 
+      const totalKeywords = [...new Set([...userKeywords, ...extraKeywords])];
+
       try {
-        const signupResult = await signup(userData, userKeywords);
+        const signupResult = await signup(userData, totalKeywords);
 
         if (signupResult.result === "ok") {
           return handleSignupResult(true);
