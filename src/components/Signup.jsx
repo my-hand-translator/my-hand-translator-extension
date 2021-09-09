@@ -7,7 +7,6 @@ import ErrorStyled from "./shared/Error";
 import Button from "./shared/Button";
 
 import { signup } from "../services/userService";
-
 import { DEFAULT_KEYWORDS } from "../constants/user";
 
 export default function Signup({ handleSignupResult }) {
@@ -24,8 +23,10 @@ export default function Signup({ handleSignupResult }) {
         return setError(chrome.runtime.lastError.message);
       }
 
+      const totalKeywords = [...new Set([...userKeywords, ...extraKeywords])];
+
       try {
-        const signupResult = await signup(userData, userKeywords);
+        const signupResult = await signup(userData, totalKeywords);
 
         if (signupResult.result === "ok") {
           return handleSignupResult(true);

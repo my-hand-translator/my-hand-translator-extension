@@ -1,26 +1,23 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import ContainerStyled from "./shared/Container";
 import TextBox from "./shared/TextBox";
 import SubTitle from "./shared/SubTitle";
+import ContainerStyled from "./shared/Container";
 
 import { styled } from "../config/stitches.config";
 
 const Textarea = styled("textarea", {
+  padding: "10px",
+  overflow: "auto",
   fontSize: "20px",
   borderRadius: "10px",
-  border: "1px solid $black",
   wordWrap: "break-word",
-  overflow: "auto",
-  padding: "10px",
+  border: "1px solid $black",
 
   variants: {
     boxType: {
-      translation: {
-        width: "400px",
-        height: "200px",
-      },
+      translation: { width: "400px", height: "200px" },
     },
     fontSize: {
       big: { fontSize: "30px" },
@@ -29,24 +26,33 @@ const Textarea = styled("textarea", {
   },
 });
 
-export default function Translation({ handleTranslate, textInput }) {
+export default function Translation({
+  handleChangeTextarea,
+  translationResult,
+  originText,
+}) {
+  const { translation, notification } = translationResult;
+
   return (
     <ContainerStyled flex="column" border="black">
-      <form onSubmit={handleTranslate}>
-        <ContainerStyled flex="column">
-          <SubTitle>번역할 문장</SubTitle>
-          <Textarea
-            boxType="translation"
-            type="text"
-            placeholder="번역할 문장을 입력해주세요."
-          />
-        </ContainerStyled>
-      </form>
+      <ContainerStyled flex="column">
+        <SubTitle>번역할 문장</SubTitle>
+        <Textarea
+          boxType="translation"
+          type="text"
+          placeholder="번역할 문장을 입력해주세요."
+          onChange={handleChangeTextarea}
+        >
+          {originText}
+        </Textarea>
+      </ContainerStyled>
       <ContainerStyled flex="column">
         <SubTitle>번역 결과</SubTitle>
-        <SubTitle>이 번역은 000에 의해 번역된 결과입니다.</SubTitle>
+        <SubTitle fontSize="small" color="apricot">
+          {notification}
+        </SubTitle>
         <TextBox border="black">
-          {textInput || "변역 결과가 표시됩니다."}
+          {translation || "번역 결과가 표시됩니다."}
         </TextBox>
       </ContainerStyled>
     </ContainerStyled>
@@ -54,10 +60,18 @@ export default function Translation({ handleTranslate, textInput }) {
 }
 
 Translation.propTypes = {
-  textInput: PropTypes.string,
-  handleTranslate: PropTypes.func.isRequired,
+  originText: PropTypes.string,
+  translationResult: PropTypes.objectOf({
+    translation: PropTypes.string,
+    notification: PropTypes.string,
+  }),
+  handleChangeTextarea: PropTypes.func.isRequired,
 };
 
 Translation.defaultProps = {
-  textInput: "",
+  originText: "",
+  translationResult: {
+    translation: "",
+    notification: "",
+  },
 };

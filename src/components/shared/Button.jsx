@@ -7,7 +7,7 @@ const Button = styled("button", {
   fontWeight: "bold",
   fontSize: "1rem",
 
-  background: "$lightBlue",
+  backgroundColor: "$lightBlue",
 
   boxShadow: "0 2px 10px rgba(0, 0, 0, 0.2)",
   outline: "none",
@@ -25,7 +25,14 @@ const Button = styled("button", {
       },
     },
 
-    color: {
+    bgColor: {
+      blue: { backgroundColor: "$blue" },
+      lightBlue: { backgroundColor: "$lightBlue" },
+      apricot: { backgroundColor: "$apricot" },
+      white: { backgroundColor: "$white" },
+    },
+
+    fontColor: {
       blue: { color: "$blue" },
       lightBlue: { color: "$lightBlue" },
       apricot: { color: "$apricot" },
