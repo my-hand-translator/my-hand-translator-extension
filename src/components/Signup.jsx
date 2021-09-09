@@ -7,7 +7,6 @@ import ErrorStyled from "./shared/Error";
 import Button from "./shared/Button";
 
 import { signup } from "../services/userService";
-
 import { DEFAULT_KEYWORDS } from "../constants/user";
 
 export default function Signup({ handleSignupResult }) {
