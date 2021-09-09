@@ -1,6 +1,6 @@
-import { styled } from "../config/stitches.config";
+import { styled } from "../../config/stitches.config";
 
-const ButtonStyled = styled("button", {
+const Button = styled("button", {
   border: "none",
 
   color: "white",
@@ -24,7 +24,19 @@ const ButtonStyled = styled("button", {
         height: "4em",
       },
     },
+
+    color: {
+      blue: { color: "$blue" },
+      lightBlue: { color: "$lightBlue" },
+      apricot: { color: "$apricot" },
+      white: { color: "$white" },
+    },
+
+    active: {
+      true: { background: "$lightBlue" },
+      false: { background: "$black" },
+    },
   },
 });
 
-export default ButtonStyled;
+export default Button;

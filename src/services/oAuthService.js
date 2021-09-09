@@ -34,10 +34,14 @@ const getTokens = async (url) => {
       },
     });
 
-    const { access_token: accessToken, refresh_token: refreshToken } =
-      await response.json();
+    const {
+      access_token: accessToken,
+      refresh_token: refreshToken,
+      id_token: idToken,
+    } = await response.json();
 
     return {
+      idToken,
       accessToken,
       refreshToken,
     };
