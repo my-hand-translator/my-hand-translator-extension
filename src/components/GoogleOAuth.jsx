@@ -100,14 +100,10 @@ export default function GoogleOAuth({ handleOAuthResult }) {
   const handleSubmitFormData = (event) => {
     event.preventDefault();
     setIsEnrolled(true);
+  };
 
-    const $inputs = Array.from(event.target.querySelectorAll("input"));
-    const userInputsByName = $inputs.reduce(
-      (previous, { name, value }) => ({ ...previous, [name]: value }),
-      {},
-    );
-
-    setFormData(userInputsByName);
+  const handleChangeInput = ({ target: { name, value } }) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   return (
@@ -119,9 +115,28 @@ export default function GoogleOAuth({ handleOAuthResult }) {
         </Button>
       ) : (
         <FormStyled onSubmit={handleSubmitFormData}>
-          <input type="text" placeholder="client_id" name="clientId" />
-          <input type="text" placeholder="redirect_uri" name="redirectURI" />
-          <input type="text" placeholder="client_secret" name="clientSecret" />
+          <input
+            onChange={handleChangeInput}
+            type="text"
+            placeholder="client_id"
+            name="clientId"
+            value={formData.clientId}
+          />
+          <input
+            onChange={handleChangeInput}
+            type="text"
+            placeholder="redirect_uri"
+            name="redirectURI"
+            value={formData.redirectURI}
+          />
+          <input
+            onChange={handleChangeInput}
+            type="text"
+            placeholder="client_secret"
+            name="clientSecret"
+            value={formData.clientSecret}
+          />
+
           <Button type="submit" size="middle">
             사용자 정보 입력하기
           </Button>
