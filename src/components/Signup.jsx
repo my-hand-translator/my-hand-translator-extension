@@ -24,11 +24,19 @@ export default function Signup({ handleSignupResult }) {
       }
 
       const totalKeywords = [...new Set([...userKeywords, ...extraKeywords])];
+      const newUser = { ...userData, glossary: userData.glossary ?? {} };
 
       try {
-        const signupResult = await signup(userData, totalKeywords);
+        const signupResult = await signup(newUser, totalKeywords);
 
         if (signupResult.result === "ok") {
+          const userWithGlossaryId = {
+            ...userData,
+            glossaryId: signupResult.glossaryId,
+          };
+
+          chrome.storage.sync.set({ userData: userWithGlossaryId });
+
           return handleSignupResult(true);
         }
 

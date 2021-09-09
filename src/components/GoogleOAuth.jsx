@@ -79,8 +79,10 @@ export default function GoogleOAuth({ handleOAuthResult }) {
                   name: email.split("@")[0],
                   tokens,
                   signed: SIGNING_STATUS.NOT_CONFIRMED,
-                  glossary: {},
+                  glossary: null,
+                  glossaryId: "",
                   isServerOn: false,
+                  translations: [],
                 },
               });
             });

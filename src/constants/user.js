@@ -15,6 +15,11 @@ export const DEFAULT_KEYWORDS = [
 ];
 
 export const URLS = {
-  LOGIN: "/users/login",
-  SIGNUP: "/users/signup",
+  USERS: "/users",
+  LOGIN: "/login",
+  SIGNUP: "/signup",
+  GLOSSARIES: "/glossaries",
+  GLOSSARY: "/glossary",
+  TRANSLATIONS: "/translations",
+  TRANSLATION: "/translation",
 };

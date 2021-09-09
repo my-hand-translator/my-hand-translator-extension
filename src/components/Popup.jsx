@@ -12,7 +12,12 @@ import Signup from "./Signup";
 import Login from "./GoogleOAuth";
 import Translation from "./Translation";
 
-import { login } from "../services/userService";
+import {
+  addTranslations,
+  editGlossary,
+  getGlossary,
+  login,
+} from "../services/userService";
 import { SIGNING_STATUS } from "../constants/user";
 
 const TAB_BASE_URL = `chrome-extension://${chrome.runtime.id}/options.html#/`;
@@ -61,6 +66,56 @@ export default function Popup() {
     });
   };
 
+  const synchronizeUserAndServer = () => {
+    chrome.storage.sync.get(["userData"], ({ userData }) => {
+      if (!userData) {
+        return setError("유저 데이터가 없습니다.");
+      }
+
+      try {
+        (async () => {
+          const gettingGlossaryResponse = await getGlossary(userData);
+
+          if (gettingGlossaryResponse.result !== "ok") {
+            throw gettingGlossaryResponse;
+          }
+
+          const mergedGlossary = {
+            ...userData.glossary,
+            ...gettingGlossaryResponse.data,
+          };
+
+          const newUserData = { ...userData, glossary: mergedGlossary };
+
+          const editingGlossaryResponse = await editGlossary(newUserData);
+
+          if (editingGlossaryResponse.result !== "ok") {
+            throw editingGlossaryResponse;
+          }
+
+          chrome.storage.sync.set({ userData: newUserData });
+          setUser(newUserData);
+        })();
+      } catch (err) {
+        setError(err.message);
+      }
+
+      try {
+        (async () => {
+          const response = await addTranslations(userData);
+
+          if (response.result !== "ok") {
+            throw response;
+          }
+        })();
+      } catch (err) {
+        setError(err.message);
+      }
+
+      return null;
+    });
+  };
+
   const handleToggleServerConnection = async () => {
     if (isServerOn) {
       chrome.storage.sync.set({
@@ -77,7 +132,16 @@ export default function Popup() {
         throw loginResult;
       }
 
+      const newUserData = { ...user, glossaryId: loginResult.glossaryId };
+
+      chrome.storage.sync.set({ userData: newUserData });
+      setUser(newUserData);
+
       updateUserSigningStatus(loginResult.isUser);
+
+      if (loginResult.isUser) {
+        synchronizeUserAndServer();
+      }
 
       return setIsServerOn(true);
     } catch (err) {
@@ -97,7 +161,7 @@ export default function Popup() {
   };
 
   const handleClickTranslation = () => {
-    // 번역
+    // TODO 번역 요청
   };
 
   const handleClickOptionButton = ({ target: { name } }) => {
