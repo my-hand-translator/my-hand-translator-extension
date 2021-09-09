@@ -4,7 +4,7 @@ import { DEFAULT_KEYWORDS } from "../constants/user";
 import Button from "./shared/Button";
 
 import ContainerStyled from "./shared/Container";
-import { signup } from "../services/loginService";
+import { signup } from "../services/userService";
 import ErrorStyled from "./shared/Error";
 
 export default function Signup({ handleSignupResult }) {
@@ -15,7 +15,12 @@ export default function Signup({ handleSignupResult }) {
     event.preventDefault();
 
     const inputs = Array.from(event.target.querySelectorAll("input"));
-    const keywords = inputs.map(({ value }) => value).filter(Boolean);
+    const keywords = inputs
+      .filter(
+        ({ type, value }) =>
+          (type.checked || type === "text") && Boolean(value),
+      )
+      .map(({ value }) => value);
 
     chrome.storage.sync.get(["userData"], async ({ userData }) => {
       if (chrome.runtime.lastError) {
@@ -25,13 +30,13 @@ export default function Signup({ handleSignupResult }) {
       try {
         const signupResult = await signup(userData, keywords);
 
-        console.log(signupResult);
-
         if (signupResult.result === "ok") {
           return handleSignupResult(true);
         }
 
-        return handleSignupResult(false);
+        handleSignupResult(false);
+
+        return setError(signupResult.result.message);
       } catch (err) {
         return setError(err.message);
       }

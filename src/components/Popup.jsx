@@ -12,27 +12,14 @@ import Translation from "./Translation";
 import { globalCss } from "../config/stitches.config";
 import { SIGNING_STATUS } from "../constants/user";
 import Signup from "./Signup";
-import { login } from "../services/loginService";
+import { login } from "../services/userService";
 
 const TAB_BASE_URL = `chrome-extension://${chrome.runtime.id}/options.html#/`;
-
-const initialUserData = {
-  email: "",
-  name: "",
-  tokens: {
-    access_token: "",
-    id_token: "",
-    refresh_token: "",
-  },
-  clientId: "",
-  signed: "not confirmed",
-  glossary: {},
-};
 
 export default function Popup() {
   const [isOAuthSuccess, setIsOAuthSuccess] = useState(false);
   const [isServerOn, setIsServerOn] = useState(false);
-  const [user, setUser] = useState(initialUserData);
+  const [user, setUser] = useState(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -45,19 +32,14 @@ export default function Popup() {
 
       if (userData) {
         setUser(userData);
-
-        if (userData.signed === SIGNING_STATUS.CONFIRMED) {
-          setIsServerOn(TextTrackCueList);
-        }
-
-        console.log("UserData: ", userData);
+        setIsServerOn(userData.isServerOn);
 
         return setIsOAuthSuccess(true);
       }
 
       return setIsOAuthSuccess(false);
     });
-  }, []);
+  }, [isOAuthSuccess]);
 
   const updateUserSigningStatus = (status) => {
     setUser((prevUser) => {
@@ -65,10 +47,7 @@ export default function Popup() {
         ? SIGNING_STATUS.CONFIRMED
         : SIGNING_STATUS.UNDERWAY;
 
-      const newUser = {
-        ...prevUser,
-        signed: signingStatus,
-      };
+      const newUser = { ...prevUser, signed: signingStatus, isServerOn: true };
 
       chrome.storage.sync.set({ userData: newUser });
 
@@ -77,8 +56,11 @@ export default function Popup() {
   };
 
   const handleToggleServerConnection = async () => {
-    if (!isServerOn) {
-      setIsServerOn(false);
+    if (isServerOn) {
+      chrome.storage.sync.set({
+        userData: { ...user, isServerOn: false },
+      });
+      return setIsServerOn(false);
     }
 
     const loginResult = await login(user);
@@ -105,8 +87,8 @@ export default function Popup() {
 
   const handleClickTranslation = (event) => {
     if (event) {
-      // 엔터로 번역 오청
       event.preventDefault();
+      // 엔터로 번역 요청
     } else {
       // 클릭으로 번역 요청
     }
@@ -133,13 +115,11 @@ export default function Popup() {
               {isServerOn ? "서버 연결 끊기" : "서버 연결"}
             </Button>
           </ContainerStyled>
-
-          {user.signed === SIGNING_STATUS.UNDERWAY ? (
+          {user?.signed === SIGNING_STATUS.UNDERWAY ? (
             <Signup handleSignupResult={handleSignupResult} />
           ) : (
             <Translation handleTranslate={handleClickTranslation} />
           )}
-
           <ContainerStyled flex="row" justify="spaceBetween">
             <Button name="my-glossary" onClick={handleClickOptionButton}>
               내 용어집 편집하기
