@@ -6,10 +6,16 @@ import {
   Link,
   Redirect,
 } from "react-router-dom";
+import MyTranslations from "./MyTranslations";
+
+import reset from "../config/reset";
+
+import { globalCss } from "../config/stitches.config";
 
 import Popup from "./Popup";
 
 function Options() {
+  globalCss(reset)();
   return (
     <Router>
       <h1>Options</h1>
@@ -40,7 +46,7 @@ function Options() {
           <div>My Glossary</div>
         </Route>
         <Route exact path="/my-translations">
-          <div>My Translations</div>
+          <MyTranslations />
         </Route>
         <Route exact path="/other-glossaries">
           <div>Other Glossaries</div>
