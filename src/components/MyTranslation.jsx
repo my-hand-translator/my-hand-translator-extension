@@ -3,11 +3,10 @@ import PropTypes from "prop-types";
 import { styled } from "../config/stitches.config";
 import Button from "./shared/Button";
 
-const TranslationStyled = styled("div", {
+import Container from "./shared/Container";
+
+const TranslationsContainer = styled(Container, {
   width: "80%",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
   padding: "2em",
 
   boxShadow: "0 2px 10px rgba(0, 0, 0, 0.3)",
@@ -16,12 +15,7 @@ const TranslationStyled = styled("div", {
   marginBottom: "1em",
 });
 
-const TranslationContent = styled("div", {
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  flexDirection: "column",
-
+const TranslationContent = styled(Container, {
   "& span": {
     marginBottom: "0.5em",
   },
@@ -29,12 +23,7 @@ const TranslationContent = styled("div", {
   flex: "1 1 30%",
 });
 
-const URLContent = styled("div", {
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  flexDirection: "column",
-
+const URLContainer = styled(Container, {
   "& span": {
     marginBottom: "0.5em",
   },
@@ -44,24 +33,26 @@ const URLContent = styled("div", {
 
 function MyTranslation({ translation, onClick }) {
   return (
-    <TranslationStyled>
-      <TranslationContent>
+    <TranslationsContainer justify="center" align="center">
+      <TranslationContent justify="center" align="center" flex="column">
         <span>원문</span>
         <p>{translation.origin}</p>
       </TranslationContent>
-      <TranslationContent>
+      <TranslationContent justify="center" align="center" flex="column">
         <span>번역 결과</span>
         <p>{translation.translated}</p>
       </TranslationContent>
-      <URLContent>
+      <URLContainer justify="center" align="center" flex="column">
         <span>URL</span>
         <p>{translation.url}</p>
-      </URLContent>
+      </URLContainer>
 
-      <Button type="button" size="small" onClick={() => onClick(translation)}>
-        삭제
-      </Button>
-    </TranslationStyled>
+      <Container justify="center" align="center">
+        <Button type="button" size="small" onClick={() => onClick(translation)}>
+          삭제
+        </Button>
+      </Container>
+    </TranslationsContainer>
   );
 }
 

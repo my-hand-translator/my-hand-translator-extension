@@ -4,22 +4,20 @@ import Title from "./shared/Title";
 import MyTranslation from "./MyTranslation";
 import ErrorStyled from "./shared/Error";
 import Button from "./shared/Button";
+import Container from "./shared/Container";
 
 import { styled } from "../config/stitches.config";
 import debounce from "../utils/utils";
+import {
+  createTranslationParam,
+  getTranslations,
+} from "../services/translationService";
 
-const HeaderStyled = styled("div", {
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  marginBottom: "3em",
+const HeaderContainer = styled(Container, {
+  marginBottom: "2em",
 });
 
-const TranslationsStyled = styled("div", {
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  flexDirection: "column",
+const TranslationsContainer = styled(Container, {
   width: "100%",
 });
 
@@ -29,6 +27,10 @@ const FormContent = styled("form", {
   "& input": {
     marginRight: "0.5em",
   },
+});
+
+const FormContainer = styled(Container, {
+  width: "90%",
 });
 
 const SPLIT_UNIT = 5;
@@ -44,13 +46,34 @@ function MyTranslations() {
   const observedElement = useRef();
 
   useEffect(() => {
-    chrome.storage.sync.get(["translations"], (data) => {
+    chrome.storage.sync.get(["userData"], async ({ userData }) => {
       if (chrome.runtime.lastError) {
         setError(chrome.runtime.lastError.message);
       }
 
-      setTranslations(data.translations);
-      setSplitIndex(SPLIT_UNIT);
+      if (userData?.isServerOn) {
+        const params = createTranslationParam(1, 100);
+
+        try {
+          const serverTransitions = await getTranslations(userData, params);
+
+          setTranslations(serverTransitions);
+          setSplitIndex(SPLIT_UNIT);
+        } catch (err) {
+          setError(err.message);
+        }
+
+        return;
+      }
+
+      chrome.storage.sync.get(["translations"], (data) => {
+        if (chrome.runtime.lastError) {
+          setError(chrome.runtime.lastError.message);
+        }
+
+        setTranslations(data.translations);
+        setSplitIndex(SPLIT_UNIT);
+      });
     });
   }, []);
 
@@ -110,23 +133,29 @@ function MyTranslations() {
 
   return (
     <>
-      <HeaderStyled>
+      <HeaderContainer justify="center" align="center">
         <Title>내 번역 기록 보기</Title>
-      </HeaderStyled>
+      </HeaderContainer>
       {error && <ErrorStyled>{error}</ErrorStyled>}
-      <TranslationsStyled>
-        <FormContent>
-          <input
-            type="text"
-            placeholder="검색어를 입력하세요."
-            onChange={({ target }) => {
-              handleSearchValue(target.value);
-            }}
-          />
-          <Button size="small" type="button" onClick={handleSearchButtonClick}>
-            검색
-          </Button>
-        </FormContent>
+      <TranslationsContainer justify="center" align="center" flex="column">
+        <FormContainer justify="end">
+          <FormContent>
+            <input
+              type="text"
+              placeholder="검색어를 입력하세요."
+              onChange={({ target }) => {
+                handleSearchValue(target.value);
+              }}
+            />
+            <Button
+              size="small"
+              type="button"
+              onClick={handleSearchButtonClick}
+            >
+              검색
+            </Button>
+          </FormContent>
+        </FormContainer>
         {translations.length !== 0 &&
           translations.map((translation, index) => {
             if (index < splitIndex) {
@@ -141,7 +170,7 @@ function MyTranslations() {
 
             return null;
           })}
-      </TranslationsStyled>
+      </TranslationsContainer>
       {!isSearched && <div ref={observedElement} />}
     </>
   );
