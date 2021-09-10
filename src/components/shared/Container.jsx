@@ -36,6 +36,7 @@ const ContainerStyled = styled("div", {
       center: { justifyContent: "center" },
       spaceBetween: { justifyContent: "space-between" },
       spaceAround: { justifyContent: "space-around" },
+      spaceEvenly: { justifyContent: "space-evenly" },
     },
 
     align: {
@@ -44,6 +45,7 @@ const ContainerStyled = styled("div", {
       center: { alignSelf: "center" },
       spaceBetween: { alignSelf: "space-between" },
       spaceAround: { alignSelf: "space-around" },
+      itemCenter: { alignItems: "center" },
     },
 
     border: {
