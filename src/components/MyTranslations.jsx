@@ -1,16 +1,18 @@
 import React, { useEffect, useRef, useState } from "react";
 
 import Title from "./shared/Title";
-import MyTranslation from "./MyTranslation";
 import ErrorStyled from "./shared/Error";
 import Button from "./shared/Button";
 import Container from "./shared/Container";
+
+import MyTranslation from "./MyTranslation";
 
 import { styled } from "../config/stitches.config";
 import debounce from "../utils/utils";
 import {
   createTranslationParam,
   getTranslations,
+  combineTranslations,
 } from "../services/translationService";
 
 const HeaderContainer = styled(Container, {
@@ -46,34 +48,41 @@ function MyTranslations() {
   const observedElement = useRef();
 
   useEffect(() => {
-    chrome.storage.sync.get(["userData"], async ({ userData }) => {
+    chrome.storage.sync.get(["userData"], ({ userData }) => {
       if (chrome.runtime.lastError) {
         setError(chrome.runtime.lastError.message);
       }
 
-      if (userData?.isServerOn) {
-        const params = createTranslationParam(1, 100);
+      chrome.storage.sync.get(
+        ["translations"],
+        async ({ translations: storageTranslations }) => {
+          if (chrome.runtime.lastError) {
+            setError(chrome.runtime.lastError.message);
+          }
 
-        try {
-          const serverTransitions = await getTranslations(userData, params);
+          if (userData?.isServerOn) {
+            const params = createTranslationParam(1, 100);
 
-          setTranslations(serverTransitions);
+            try {
+              const serverTransitions = await getTranslations(userData, params);
+              const combinedTranslations = combineTranslations(
+                storageTranslations,
+                serverTransitions,
+              );
+
+              setTranslations(combinedTranslations);
+              setSplitIndex(SPLIT_UNIT);
+
+              return;
+            } catch (err) {
+              setError(err.message);
+            }
+          }
+
+          setTranslations(storageTranslations);
           setSplitIndex(SPLIT_UNIT);
-        } catch (err) {
-          setError(err.message);
-        }
-
-        return;
-      }
-
-      chrome.storage.sync.get(["translations"], (data) => {
-        if (chrome.runtime.lastError) {
-          setError(chrome.runtime.lastError.message);
-        }
-
-        setTranslations(data.translations);
-        setSplitIndex(SPLIT_UNIT);
-      });
+        },
+      );
     });
   }, []);
 
@@ -93,7 +102,9 @@ function MyTranslations() {
     const currentObservedElement = observedElement.current;
     const observer = new IntersectionObserver(handleObserver);
 
-    if (currentObservedElement) observer.observe(currentObservedElement);
+    if (currentObservedElement) {
+      observer.observe(currentObservedElement);
+    }
 
     return () => {
       observer.unobserve(currentObservedElement);

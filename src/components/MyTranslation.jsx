@@ -1,9 +1,10 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { styled } from "../config/stitches.config";
-import Button from "./shared/Button";
 
+import Button from "./shared/Button";
 import Container from "./shared/Container";
+
+import { styled } from "../config/stitches.config";
 
 const TranslationsContainer = styled(Container, {
   width: "80%",

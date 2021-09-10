@@ -1,6 +1,6 @@
 export const getTranslations = async (user, params) => {
   const response = await fetch(
-    `${process.env.SERVER_URL}/users/${user.email}?${params}`,
+    `${process.env.SERVER_URL}/translations/${user.email}?${params}`,
     {
       method: "GET",
       headers: {
@@ -17,7 +17,7 @@ export const getTranslations = async (user, params) => {
     throw data;
   }
 
-  return data;
+  return data.data;
 };
 
 export const createTranslationParam = (page, limit) => {
@@ -28,3 +28,20 @@ export const createTranslationParam = (page, limit) => {
 
   return new URLSearchParams(params).toString();
 };
+
+export const combineTranslations = (storageTranslations, serverTranslations) => {
+  const combinedTranslations = serverTranslations;
+  const uniqueNanoIds = new Set();
+
+  combinedTranslations.forEach((combinedTranslation) => {
+    uniqueNanoIds.add(combinedTranslation.nanoId);
+  });
+
+  storageTranslations.forEach((storageTranslation) => {
+    if (!uniqueNanoIds.has(storageTranslation.nanoId)) {
+      combinedTranslations.push(storageTranslation);
+    }
+  });
+
+  return combinedTranslations;
+}

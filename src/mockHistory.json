@@ -94,5 +94,11 @@
     "translated": "그러나 setInterval() 및 clear를 사용하는 이유훅으로 짜증나는 간격? 다시 예제로 돌아가서 수동으로 구현해 보겠습니다.",
     "url": "https://overreacted.io",
     "nanoId": "1125211567421314312"
+  },
+  {
+    "origin": "But why is using setInterval() and clearInterval() annoying with Hooks? Let’s go back to our counter example and try to implement it manually.",
+    "translated": "그러나 setInterval() 및 clear를 사용하는 이유훅으로 짜증나는 간격? 다시 예제로 돌아가서 수동으로 구현해 보겠습니다.",
+    "url": "https://overreacted.io",
+    "nanoId": "587489579234"
   }
 ]
