@@ -22,4 +22,6 @@ export const URLS = {
   GLOSSARY: "/glossary",
   TRANSLATIONS: "/translations",
   TRANSLATION: "/translation",
+  TRANSLATED: "/translated",
+  WORDS: "/words",
 };

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-import { globalCss } from "../config/stitches.config";
-import reset from "../config/reset";
+import { nanoid } from "nanoid";
 
 import ContainerStyled from "./shared/Container";
 import ErrorStyled from "./shared/Error";
@@ -19,6 +18,13 @@ import {
   login,
 } from "../services/userService";
 import { SIGNING_STATUS } from "../constants/user";
+import {
+  getGlossaryFromGoogleCloudAPI,
+  getTranslationFromChromeStorage,
+  getTranslationFromGoogleCloudAPI,
+  getTranslationFromServer,
+  sendTranslationResult,
+} from "../services/translationService";
 
 const TAB_BASE_URL = `chrome-extension://${chrome.runtime.id}/options.html#/`;
 
@@ -31,10 +37,11 @@ export default function Popup() {
   const [translationResult, setTranslationResult] = useState({
     translation: "",
     notification: "",
+    glossary: {},
   });
 
   useEffect(() => {
-    chrome.storage.sync.get(["userData"], ({ userData }) => {
+    chrome.storage.sync.get(["userData"], async ({ userData }) => {
       if (chrome.runtime.lastError) {
         setError(chrome.runtime.lastError.message);
 
@@ -44,6 +51,12 @@ export default function Popup() {
       if (userData) {
         setUser(userData);
         setIsServerOn(userData.isServerOn);
+
+        const glossary = await getGlossaryFromGoogleCloudAPI(
+          userData.tokens.accessToken,
+        );
+
+        chrome.storage.sync.set({ userData: { ...userData, glossary } });
 
         return setIsOAuthSuccess(true);
       }
@@ -160,15 +173,94 @@ export default function Popup() {
     setOriginText(value);
   };
 
-  const handleClickTranslation = () => {
-    // TODO 번역 요청
+  const googleTranslate = async () => {
+    chrome.storage.sync.get("currentUrl", async ({ currentUrl }) => {
+      const translated = await getTranslationFromGoogleCloudAPI(
+        user,
+        originText,
+      );
+
+      if (translated.error) {
+        return setError("구글 API 번역 요청 중 에러가 발생했습니다.");
+      }
+
+      const { translatedText } = translated.glossaryTranslations[0];
+
+      const currentTranslationResult = {
+        text: originText,
+        translated: translatedText,
+        url: currentUrl,
+        glossary: user.glossary,
+        createdAt: new Date().toISOString(),
+        nanoId: nanoid(),
+      };
+
+      chrome.storage.sync.set({
+        userData: {
+          ...user,
+          translations: user.translations.concat(currentTranslationResult),
+        },
+      });
+
+      if (isServerOn) {
+        const response = await sendTranslationResult(
+          user,
+          currentTranslationResult,
+        );
+
+        if (response.result !== "ok") {
+          setError("서버에 번역 결과를 저장하는데 실패했습니다.");
+        }
+      }
+
+      return setTranslationResult({
+        translation: translatedText,
+        notification: "구글 API",
+        glossary: user.glossary,
+      });
+    });
+  };
+
+  const handleClickTranslation = async () => {
+    try {
+      let translated = await getTranslationFromChromeStorage(
+        user.translations,
+        originText,
+      );
+
+      if (translated) {
+        return setTranslationResult({
+          translation: translated.translated,
+          notification: "로컬 스토리지",
+          glossary: translated.glossary,
+        });
+      }
+
+      if (isServerOn) {
+        translated = await getTranslationFromServer(user, originText);
+
+        if (translated.result !== "ok") {
+          return setError(translated.error.message);
+        }
+      }
+
+      if (isServerOn && translated.data) {
+        return setTranslationResult({
+          translation: translated.data.translated,
+          notification: "서버",
+          glossary: translated.data.glossary,
+        });
+      }
+
+      return googleTranslate();
+    } catch (err) {
+      return setError(err.message || err.error.message);
+    }
   };
 
   const handleClickOptionButton = ({ target: { name } }) => {
     chrome.tabs.create({ url: TAB_BASE_URL + name });
   };
-
-  globalCss(reset)();
 
   return (
     <ContainerStyled flex="column">
@@ -198,7 +290,7 @@ export default function Popup() {
               <Translation
                 originText={originText}
                 translationResult={translationResult}
-                handleTranslate={handleClickTranslation}
+                handleClickGoogleTranslate={googleTranslate}
                 handleChangeTextarea={handleChangeTextarea}
               />
 
@@ -208,7 +300,7 @@ export default function Popup() {
                   bgColor="lightBlue"
                   onClick={handleClickOptionButton}
                 >
-                  내 용어집 편집하기
+                  내 용어집 {user.glossary ? "편집" : "생성"} 하기
                 </Button>
 
                 <Button
