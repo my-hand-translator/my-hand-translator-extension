@@ -20,4 +20,8 @@ export const {
       red: "#EA4435",
     },
   },
+  media: {
+    tabMedium: "(max-width: 768px)",
+    tabLarge: "(max-width: 1024px)",
+  },
 });
