@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useHistory } from "react-router";
+import { useHistory } from "react-router-dom";
 
 import Button from "./shared/Button";
 import Title from "./shared/Title";
@@ -7,13 +7,16 @@ import SubTitle from "./shared/SubTitle";
 import ErrorStyled from "./shared/Error";
 import ContainerStyled from "./shared/Container";
 import TabContainer from "./shared/TabContainer";
+import chromeStore from "../utils/chromeStore";
 
-import { PROJECT_API, STORAGE_API, STORAGE_UPLOAD_API } from "../constants/url";
-import chromStore from "../utils/chromStore";
-import fetchData, { createAuthHeader } from "../utils/fetchData";
-import { refreshAndGetNewTokens } from "../services/translationService";
-
-const GLOSSARY_NAME = "my-glossary";
+import {
+  createBucket,
+  createGlossaryFromGoogleTranslation,
+  getCsvFromGoogleStorage,
+  getGlossaryFromServer,
+  updateCsvFromGoogleStorage,
+  updateGlossaryFromServer,
+} from "../services/glossaryService";
 
 const initWordsToAdd = {
   text: "",
@@ -32,13 +35,10 @@ function EditGlossary() {
   const focus = useRef(null);
   const history = useHistory();
 
-  // 크롬 스토리지의 유저데이터 가져오기
   useEffect(() => {
     (async () => {
       try {
-        const userData = await chromStore.get("userData");
-
-        console.log(userData);
+        const userData = await chromeStore.get("userData");
 
         setBucketId(userData.email.replace(/@|\./gi, ""));
         setUser(userData);
@@ -49,73 +49,36 @@ function EditGlossary() {
     })();
   }, []);
 
-  // 버킷에 있는 csv파일 읽어온 후 있으면 glossary 업데이트. && 서버가 켜있을 때 용어집 가져오기
   useEffect(() => {
     if (user) {
-      const { isServerOn, email } = user;
+      const {
+        isServerOn,
+        email,
+        tokens: { accessToken },
+      } = user;
 
       (async () => {
-        try {
-          const {
-            tokens: { accessToken },
-          } = user;
+        const dataFromGoogle = await getCsvFromGoogleStorage(
+          {
+            accessToken,
+            bucketId,
+          },
+          setErrorMassage,
+        );
 
-          const authHeader = createAuthHeader(accessToken);
-          const response = await fetch(
-            `${STORAGE_API}/${bucketId}/o/${GLOSSARY_NAME}.csv?alt=media`,
-            {
-              headers: { ...authHeader },
-            },
+        setHasBucket(dataFromGoogle.hasBucket);
+
+        if (isServerOn && dataFromGoogle.hasBucket) {
+          const dataFromServer = await getGlossaryFromServer(
+            { userId: email, accessToken },
+            setErrorMassage,
           );
 
-          console.log(response);
-
-          if (response.ok) {
-            setHasBucket(true);
-
-            const bucketGlossayData = await response.text();
-
-            const convertJson = (csv) => {
-              const result = {};
-              const pairs = csv.split("\r\n");
-
-              for (let i = 0; i < pairs.length - 1; i += 1) {
-                const [text, translation] = pairs[i].split(",");
-                result[text] = translation;
-              }
-
-              return result;
-            };
-
-            const convertedGlossay = convertJson(bucketGlossayData);
-
-            if (isServerOn) {
-              const { data, result } = await fetchData(
-                `${process.env.SERVER_URL}/users/${email}/glossary`,
-              );
-
-              if (result !== "ok") {
-                return errorMassage(result.error.message);
-              }
-
-              if (data) {
-                Object.assign(convertedGlossay, data);
-              }
-            }
-
-            setGlossary(convertedGlossay);
-            return setIsLoading(false);
-          }
-
-          const result = await response.text();
-
-          if (result === "The specified bucket does not exist.") {
-            setHasBucket(false);
-          }
-        } catch (error) {
-          setIsLoading(false);
-          return errorMassage(error.message);
+          Object.assign(dataFromGoogle.glossayData, dataFromServer);
         }
+
+        setGlossary(dataFromGoogle.glossayData);
+        setIsLoading(false);
       })();
     }
   }, [user]);
@@ -159,57 +122,28 @@ function EditGlossary() {
   };
 
   const handleDeleteGlossary = (text) => {
-    const copyGlossary = { ...glossary };
+    const newGlossary = { ...glossary };
 
-    delete copyGlossary[text];
+    delete newGlossary[text];
 
-    setGlossary(copyGlossary);
+    setGlossary(newGlossary);
   };
 
   const handleEditGlossary = async () => {
     setIsLoading(true);
 
     const {
+      isServerOn,
+      projectId,
       tokens: { accessToken },
     } = user;
-    const authHeader = createAuthHeader(accessToken);
 
-    console.log(accessToken, authHeader);
-
-    // 버킷이 없을 경우 버킷 생성
     if (!hasBucket) {
-      const data = {
-        name: bucketId,
-        location: "asia-northeast3",
-        storageClass: "Standard",
-        iamConfiguration: {
-          uniformBucketLevelAccess: {
-            enabled: true,
-          },
-        },
-      };
-
-      try {
-        const responseData = await fetchData(
-          `${STORAGE_API}?project=${user.projectId}`,
-          "POST",
-          authHeader,
-          data,
-        );
-
-        const { error } = responseData;
-
-        if (error) {
-          setErrorMassage(error.message);
-        }
-      } catch (error) {
-        setErrorMassage(error.message);
-      }
+      await createBucket({ bucketId, projectId, accessToken }, setErrorMassage);
     }
 
-    // 편집한 용어집을 버킷에 csv파일로 업로드
-    let csv = "";
     const glossaryKeys = Object.keys(glossary);
+    let csv = "";
 
     for (let i = 0; i < glossaryKeys.length; i += 1) {
       const key = glossaryKeys[i];
@@ -217,78 +151,25 @@ function EditGlossary() {
       csv += `${key},${glossary[key]}\r\n`;
     }
 
-    try {
-      await fetch(
-        `${STORAGE_UPLOAD_API}/${bucketId}/o?uploadType=media&name=${GLOSSARY_NAME}.csv`,
-        {
-          method: "POST",
-          headers: {
-            ...authHeader,
-            "Content-Type": "text/plain; charset=utf-8",
-          },
-          body: csv,
-        },
+    await updateCsvFromGoogleStorage(
+      { csv, bucketId, accessToken },
+      setErrorMassage,
+    );
+
+    await createGlossaryFromGoogleTranslation(
+      { projectId, accessToken, bucketId },
+      setErrorMassage,
+    );
+
+    if (isServerOn) {
+      const glossaryId = await chromeStore.get("glossaryId");
+
+      await updateGlossaryFromServer(
+        { glossaryId, glossary, accessToken },
+        setErrorMassage,
       );
-    } catch (error) {
-      setErrorMassage(error.message);
     }
 
-    // 용어집 삭제 후 생성
-    try {
-      if (user.glossary) {
-        const responseData = await fetchData(
-          `${PROJECT_API}/${user.projectId}/locations/us-central1/glossaries/${GLOSSARY_NAME}`,
-          "DELETE",
-          authHeader,
-        );
-
-        console.log(responseData);
-      }
-
-      const data = {
-        name: `projects/${user.projectId}/locations/us-central1/glossaries/${GLOSSARY_NAME}`,
-        languagePair: {
-          sourceLanguageCode: "en",
-          targetLanguageCode: "ko",
-        },
-        inputConfig: {
-          gcsSource: {
-            inputUri: `gs://${bucketId}/${GLOSSARY_NAME}.csv`,
-          },
-        },
-      };
-
-      const responseData = await fetchData(
-        `${PROJECT_API}/${user.projectId}/locations/us-central1/glossaries`,
-        "POST",
-        authHeader,
-        data,
-      );
-
-      console.log(responseData);
-    } catch (error) {
-      setErrorMassage(error.message);
-    }
-
-    // 서버를 켰을 때 서버에 저장
-    if (user.isServerOn) {
-      const glossaryId = await chromStore.get("glossaryId");
-
-      console.log("asdfasfsa", glossaryId);
-
-      const { result, error } = await fetchData(
-        `${process.env.SERVER_URL}/glossaries/${glossaryId}`,
-        "PATCH",
-        {},
-        { glossary },
-      );
-
-      if (result === "error") {
-        setErrorMassage(error.message);
-      }
-    }
-
-    // 크롬 스토리지에 업데이트
     try {
       const newUserData = {
         ...user,
@@ -299,14 +180,13 @@ function EditGlossary() {
         bucketId,
       };
 
-      const result = await chromStore.set("userData", newUserData);
-      console.log(result);
+      await chromeStore.set("userData", newUserData);
     } catch (error) {
       setErrorMassage(error);
     }
 
     setIsLoading(false);
-    // history.push("/");
+    history.push("/");
   };
 
   if (isLoading) {
