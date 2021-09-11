@@ -24,3 +24,15 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     }
   }
 });
+
+async function getCurrentTab() {
+  const queryOptions = { active: true, currentWindow: true };
+  const [tab] = await chrome.tabs.query(queryOptions);
+  return tab;
+}
+
+chrome.tabs.onActivated.addListener(async () => {
+  const { url: currentUrl } = await getCurrentTab();
+
+  chrome.storage.sync.set({ currentUrl });
+});

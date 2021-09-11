@@ -13,8 +13,3 @@ export const DEFAULT_KEYWORDS = [
   "Redux",
   "Vanilla Javascript",
 ];
-
-export const URLS = {
-  LOGIN: "/users/login",
-  SIGNUP: "/users/signup",
-};

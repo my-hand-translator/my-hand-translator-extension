@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-import { globalCss } from "../config/stitches.config";
-import reset from "../config/reset";
+import { nanoid } from "nanoid";
 
 import ContainerStyled from "./shared/Container";
 import ErrorStyled from "./shared/Error";
@@ -12,8 +11,22 @@ import Signup from "./Signup";
 import Login from "./GoogleOAuth";
 import Translation from "./Translation";
 
-import { login } from "../services/userService";
+import {
+  addTranslations,
+  editGlossary,
+  getGlossary,
+  login,
+} from "../services/userService";
+import {
+  getGlossaryFromGoogleCloudAPI,
+  getTranslationFromChromeStorage,
+  getTranslationFromGoogleCloudAPI,
+  getTranslationFromServer,
+  sendTranslationResult,
+} from "../services/translationService";
+
 import { SIGNING_STATUS } from "../constants/user";
+import chromeStore from "../utils/chromeStore";
 
 const TAB_BASE_URL = `chrome-extension://${chrome.runtime.id}/options.html#/`;
 
@@ -23,88 +36,223 @@ export default function Popup() {
   const [user, setUser] = useState(null);
   const [error, setError] = useState("");
   const [originText, setOriginText] = useState("");
-  const [translationResult, setTranslationResult] = useState({
-    translation: "",
-    notification: "",
-  });
+  const [translationResult, setTranslationResult] = useState({});
 
   useEffect(() => {
-    chrome.storage.sync.get(["userData"], ({ userData }) => {
-      if (chrome.runtime.lastError) {
-        setError(chrome.runtime.lastError.message);
+    (async () => {
+      try {
+        const userData = await chromeStore.get("userData");
+
+        if (userData) {
+          setUser(userData);
+          setIsServerOn(userData.isServerOn);
+
+          const glossary = await getGlossaryFromGoogleCloudAPI(userData);
+
+          await chromeStore.set("userData", { ...userData, glossary });
+
+          return setIsOAuthSuccess(true);
+        }
 
         return setIsOAuthSuccess(false);
+      } catch (err) {
+        return setError(err);
       }
-
-      if (userData) {
-        setUser(userData);
-        setIsServerOn(userData.isServerOn);
-
-        return setIsOAuthSuccess(true);
-      }
-
-      return setIsOAuthSuccess(false);
-    });
+    })();
   }, [isOAuthSuccess]);
 
-  const updateUserSigningStatus = (status) => {
-    setUser((prevUser) => {
-      const signingStatus = status
-        ? SIGNING_STATUS.CONFIRMED
-        : SIGNING_STATUS.UNDERWAY;
+  const updateUserSigningStatus = async (status) => {
+    const signingStatus = status
+      ? SIGNING_STATUS.CONFIRMED
+      : SIGNING_STATUS.UNDERWAY;
+    const newUser = { ...user, signed: signingStatus, isServerOn: true };
 
-      const newUser = { ...prevUser, signed: signingStatus, isServerOn: true };
+    try {
+      await chromeStore.set("userData", newUser);
+    } catch (err) {
+      setError(err.message);
+    }
 
-      chrome.storage.sync.set({ userData: newUser });
+    setUser(newUser);
+  };
 
-      return newUser;
-    });
+  const synchronizeUserAndServer = async () => {
+    const userData = await chromeStore.get("userData");
+
+    if (!userData) {
+      return setError("유저 데이터가 없습니다.");
+    }
+
+    const gettingGlossaryResponse = await getGlossary(userData);
+
+    if (gettingGlossaryResponse.result !== "ok") {
+      throw gettingGlossaryResponse;
+    }
+
+    const mergedGlossary = {
+      ...userData.glossary,
+      ...gettingGlossaryResponse.data,
+    };
+
+    const newUserData = { ...userData, glossary: mergedGlossary };
+
+    const editingGlossaryResponse = await editGlossary(newUserData);
+
+    if (editingGlossaryResponse.result !== "ok") {
+      setError(editingGlossaryResponse.error.message);
+    }
+
+    await chromeStore.set("userData", newUserData);
+
+    setUser(newUserData);
+
+    const addingTranslationResponse = await addTranslations(userData);
+
+    if (addingTranslationResponse.result !== "ok") {
+      setError(addingTranslationResponse.error.message);
+    }
+
+    return true;
   };
 
   const handleToggleServerConnection = async () => {
-    if (isServerOn) {
-      chrome.storage.sync.set({
-        userData: { ...user, isServerOn: false },
-      });
-
-      return setIsServerOn(false);
-    }
-
     try {
+      if (isServerOn) {
+        await chromeStore.set("userData", { ...user, isServerOn: false });
+
+        return setIsServerOn(false);
+      }
+
       const loginResult = await login(user);
 
       if (loginResult.result !== "ok") {
         throw loginResult;
       }
 
-      updateUserSigningStatus(loginResult.isUser);
+      const newUserData = { ...user, glossaryId: loginResult.glossaryId };
+
+      await chromeStore.set("userData", newUserData);
+      setUser(newUserData);
+
+      await updateUserSigningStatus(loginResult.isUser);
+
+      if (loginResult.isUser) {
+        await synchronizeUserAndServer();
+      }
 
       return setIsServerOn(true);
     } catch (err) {
       setError(err.message);
+      return setIsServerOn(false);
     }
-
-    return setIsServerOn(false);
   };
 
-  const handleSignupResult = (isSignupSuccess) => {
+  const handleSignupResult = async (isSignupSuccess) => {
     setIsServerOn(isSignupSuccess);
-    updateUserSigningStatus(isSignupSuccess);
+    await updateUserSigningStatus(isSignupSuccess);
   };
 
   const handleChangeTextarea = ({ target: { value } }) => {
     setOriginText(value);
   };
 
-  const handleClickTranslation = () => {
-    // 번역
+  const googleTranslate = async () => {
+    try {
+      const translated = await getTranslationFromGoogleCloudAPI(
+        user,
+        originText,
+      );
+      const currentUrl = await chromeStore.get("currentUrl");
+
+      if (translated.error) {
+        return setError("구글 API 번역 요청 중 에러가 발생했습니다.");
+      }
+
+      const { translatedText } = translated.glossaryTranslations[0];
+
+      const currentTranslationResult = {
+        text: originText,
+        translated: translatedText,
+        url: currentUrl,
+        glossary: user.glossary,
+        createdAt: new Date().toISOString(),
+        nanoId: nanoid(),
+      };
+
+      if (isServerOn) {
+        const sendingTranslationResponse = await sendTranslationResult(
+          user,
+          currentTranslationResult,
+        );
+
+        if (sendingTranslationResponse.result !== "ok") {
+          setError("서버에 번역 결과를 저장하는데 실패했습니다.");
+        }
+      }
+
+      const newUserData = {
+        ...user,
+        translations: user.translations.concat(currentTranslationResult),
+      };
+
+      await chromeStore.set("userData", newUserData);
+
+      return setTranslationResult({
+        translation: translatedText,
+        notification: "구글 API",
+        glossary: user.glossary,
+      });
+    } catch (err) {
+      return setError(err.message);
+    }
+  };
+
+  const handleClickTranslation = async () => {
+    setError("");
+
+    try {
+      const localTranslation = await getTranslationFromChromeStorage(
+        user.translations,
+        originText,
+      );
+
+      if (localTranslation) {
+        return setTranslationResult({
+          translation: localTranslation.translated,
+          notification: "로컬 스토리지",
+          glossary: localTranslation.glossary,
+        });
+      }
+
+      if (isServerOn) {
+        const serverTranslation = await getTranslationFromServer(
+          user,
+          originText,
+        );
+
+        if (serverTranslation.result !== "ok") {
+          setError(serverTranslation.error.message);
+        } else if (
+          serverTranslation.result === "ok" &&
+          serverTranslation.data
+        ) {
+          return setTranslationResult({
+            translation: serverTranslation.data.translated,
+            notification: "서버",
+            glossary: serverTranslation.data.glossary,
+          });
+        }
+      }
+
+      return await googleTranslate();
+    } catch (err) {
+      return setError(err.message || err.error.message);
+    }
   };
 
   const handleClickOptionButton = ({ target: { name } }) => {
     chrome.tabs.create({ url: TAB_BASE_URL + name });
   };
-
-  globalCss(reset)();
 
   return (
     <ContainerStyled flex="column">
@@ -134,7 +282,7 @@ export default function Popup() {
               <Translation
                 originText={originText}
                 translationResult={translationResult}
-                handleTranslate={handleClickTranslation}
+                handleClickGoogleTranslate={googleTranslate}
                 handleChangeTextarea={handleChangeTextarea}
               />
 
@@ -144,7 +292,7 @@ export default function Popup() {
                   bgColor="lightBlue"
                   onClick={handleClickOptionButton}
                 >
-                  내 용어집 편집하기
+                  내 용어집 {user.glossary ? "편집" : "생성"} 하기
                 </Button>
 
                 <Button

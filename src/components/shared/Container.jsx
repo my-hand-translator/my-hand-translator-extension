@@ -18,7 +18,7 @@ const ContainerStyled = styled("div", {
     size: {
       big: {
         width: "400px",
-        height: "800px",
+        height: "fit-content",
       },
       medium: {
         width: "300px",

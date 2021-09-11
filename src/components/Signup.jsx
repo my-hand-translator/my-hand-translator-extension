@@ -8,6 +8,7 @@ import Button from "./shared/Button";
 
 import { signup } from "../services/userService";
 import { DEFAULT_KEYWORDS } from "../constants/user";
+import chromeStore from "../utils/chromeStore";
 
 export default function Signup({ handleSignupResult }) {
   const [userKeywords, setUserKeywords] = useState(["default"]);
@@ -18,27 +19,29 @@ export default function Signup({ handleSignupResult }) {
   const handleSubmitForm = async (event) => {
     event.preventDefault();
 
-    chrome.storage.sync.get(["userData"], async ({ userData }) => {
-      if (chrome.runtime.lastError) {
-        return setError(chrome.runtime.lastError.message);
-      }
-
+    try {
+      const userData = await chromeStore.get("userData");
+      const newUser = { ...userData, glossary: userData.glossary ?? {} };
       const totalKeywords = [...new Set([...userKeywords, ...extraKeywords])];
+      const signupResult = await signup(newUser, totalKeywords);
 
-      try {
-        const signupResult = await signup(userData, totalKeywords);
+      if (signupResult.result === "ok") {
+        const userWithGlossaryId = {
+          ...userData,
+          glossaryId: signupResult.glossaryId,
+        };
 
-        if (signupResult.result === "ok") {
-          return handleSignupResult(true);
-        }
+        await chromeStore.set("userData", userWithGlossaryId);
 
-        handleSignupResult(false);
-
-        return setError(signupResult.result.message);
-      } catch (err) {
-        return setError(err.message);
+        return handleSignupResult(true);
       }
-    });
+
+      handleSignupResult(false);
+
+      return setError(signupResult.error.message);
+    } catch (err) {
+      return setError(err.message);
+    }
   };
 
   const handleCheckKeyword = ({ target: { name, checked } }) => {

@@ -45,6 +45,7 @@ const FormStyled = styled("form", {
 
 const initialFormData = {
   clientId: "",
+  projectId: "",
   redirectURI: "",
   clientSecret: "",
 };
@@ -67,7 +68,6 @@ export default function GoogleOAuth({ handleOAuthResult }) {
 
           const tokenParams = createTokenParams(formData, code);
           const tokenURL = `${URLS.TOKEN}?${tokenParams}&redirect_uri=${formData.redirectURI}&code=${code}`;
-
           const tokens = await getTokens(tokenURL);
 
           if (tokens) {
@@ -76,22 +76,27 @@ export default function GoogleOAuth({ handleOAuthResult }) {
                 userData: {
                   email,
                   clientId: formData.clientId,
+                  clientSecret: formData.clientSecret,
+                  projectId: formData.projectId,
                   name: email.split("@")[0],
                   tokens,
                   signed: SIGNING_STATUS.NOT_CONFIRMED,
-                  glossary: {},
+                  glossary: null,
+                  glossaryId: "",
                   isServerOn: false,
+                  translations: [],
                 },
               });
-            });
 
-            return handleOAuthResult(true);
+              handleOAuthResult(true);
+            });
           }
         } catch (err) {
           return setError(err.message);
         }
 
         setIsEnrolled(false);
+
         return handleOAuthResult(false);
       },
     );
@@ -125,9 +130,9 @@ export default function GoogleOAuth({ handleOAuthResult }) {
           <input
             onChange={handleChangeInput}
             type="text"
-            placeholder="redirect_uri"
-            name="redirectURI"
-            value={formData.redirectURI}
+            placeholder="project_id"
+            name="projectId"
+            value={formData.projectId}
           />
           <input
             onChange={handleChangeInput}
@@ -135,6 +140,13 @@ export default function GoogleOAuth({ handleOAuthResult }) {
             placeholder="client_secret"
             name="clientSecret"
             value={formData.clientSecret}
+          />
+          <input
+            onChange={handleChangeInput}
+            type="text"
+            placeholder="redirect_uri"
+            name="redirectURI"
+            value={formData.redirectURI}
           />
 
           <Button type="submit" size="middle">
