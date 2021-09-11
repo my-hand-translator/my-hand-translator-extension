@@ -5,7 +5,7 @@ export const createAuthHeader = (token) => {
   return authHeader;
 };
 
-function fetchData(url, method = "GET", headers = {}, data = "") {
+function fetchData(url, method = "GET", headers = {}, data = {}) {
   const options = {
     method,
     mode: "cors",
@@ -17,7 +17,7 @@ function fetchData(url, method = "GET", headers = {}, data = "") {
   };
 
   if (method !== "GET") {
-    options.body = data;
+    options.body = JSON.stringify(data);
   }
 
   return fetch(url, options).then((response) => response.json());
