@@ -17,7 +17,6 @@ import {
   getGlossary,
   login,
 } from "../services/userService";
-import { SIGNING_STATUS } from "../constants/user";
 import {
   getGlossaryFromGoogleCloudAPI,
   getTranslationFromChromeStorage,
@@ -25,6 +24,9 @@ import {
   getTranslationFromServer,
   sendTranslationResult,
 } from "../services/translationService";
+
+import { SIGNING_STATUS } from "../constants/user";
+import chromeStore from "../utils/chromeStore";
 
 const TAB_BASE_URL = `chrome-extension://${chrome.runtime.id}/options.html#/`;
 
@@ -34,111 +36,93 @@ export default function Popup() {
   const [user, setUser] = useState(null);
   const [error, setError] = useState("");
   const [originText, setOriginText] = useState("");
-  const [translationResult, setTranslationResult] = useState({
-    translation: "",
-    notification: "",
-    glossary: {},
-  });
+  const [translationResult, setTranslationResult] = useState({});
 
   useEffect(() => {
-    chrome.storage.sync.get(["userData"], async ({ userData }) => {
-      if (chrome.runtime.lastError) {
-        setError(chrome.runtime.lastError.message);
+    (async () => {
+      try {
+        const userData = await chromeStore.get("userData");
+
+        if (userData) {
+          setUser(userData);
+          setIsServerOn(userData.isServerOn);
+
+          const glossary = await getGlossaryFromGoogleCloudAPI(userData);
+
+          await chromeStore.set("userData", { ...userData, glossary });
+
+          return setIsOAuthSuccess(true);
+        }
 
         return setIsOAuthSuccess(false);
+      } catch (err) {
+        return setError(err);
       }
-
-      if (userData) {
-        setUser(userData);
-        setIsServerOn(userData.isServerOn);
-
-        const glossary = await getGlossaryFromGoogleCloudAPI(
-          userData.tokens.accessToken,
-        );
-
-        chrome.storage.sync.set({ userData: { ...userData, glossary } });
-
-        return setIsOAuthSuccess(true);
-      }
-
-      return setIsOAuthSuccess(false);
-    });
+    })();
   }, [isOAuthSuccess]);
 
-  const updateUserSigningStatus = (status) => {
-    setUser((prevUser) => {
-      const signingStatus = status
-        ? SIGNING_STATUS.CONFIRMED
-        : SIGNING_STATUS.UNDERWAY;
+  const updateUserSigningStatus = async (status) => {
+    const signingStatus = status
+      ? SIGNING_STATUS.CONFIRMED
+      : SIGNING_STATUS.UNDERWAY;
+    const newUser = { ...user, signed: signingStatus, isServerOn: true };
 
-      const newUser = { ...prevUser, signed: signingStatus, isServerOn: true };
+    try {
+      await chromeStore.set("userData", newUser);
+    } catch (err) {
+      setError(err.message);
+    }
 
-      chrome.storage.sync.set({ userData: newUser });
-
-      return newUser;
-    });
+    setUser(newUser);
   };
 
-  const synchronizeUserAndServer = () => {
-    chrome.storage.sync.get(["userData"], ({ userData }) => {
-      if (!userData) {
-        return setError("유저 데이터가 없습니다.");
-      }
+  const synchronizeUserAndServer = async () => {
+    const userData = await chromeStore.get("userData");
 
-      try {
-        (async () => {
-          const gettingGlossaryResponse = await getGlossary(userData);
+    if (!userData) {
+      return setError("유저 데이터가 없습니다.");
+    }
 
-          if (gettingGlossaryResponse.result !== "ok") {
-            throw gettingGlossaryResponse;
-          }
+    const gettingGlossaryResponse = await getGlossary(userData);
 
-          const mergedGlossary = {
-            ...userData.glossary,
-            ...gettingGlossaryResponse.data,
-          };
+    if (gettingGlossaryResponse.result !== "ok") {
+      throw gettingGlossaryResponse;
+    }
 
-          const newUserData = { ...userData, glossary: mergedGlossary };
+    const mergedGlossary = {
+      ...userData.glossary,
+      ...gettingGlossaryResponse.data,
+    };
 
-          const editingGlossaryResponse = await editGlossary(newUserData);
+    const newUserData = { ...userData, glossary: mergedGlossary };
 
-          if (editingGlossaryResponse.result !== "ok") {
-            throw editingGlossaryResponse;
-          }
+    const editingGlossaryResponse = await editGlossary(newUserData);
 
-          chrome.storage.sync.set({ userData: newUserData });
-          setUser(newUserData);
-        })();
-      } catch (err) {
-        setError(err.message);
-      }
+    if (editingGlossaryResponse.result !== "ok") {
+      setError(editingGlossaryResponse.error.message);
+    }
 
-      try {
-        (async () => {
-          const response = await addTranslations(userData);
+    await chromeStore.set("userData", newUserData);
 
-          if (response.result !== "ok") {
-            throw response;
-          }
-        })();
-      } catch (err) {
-        setError(err.message);
-      }
+    setUser(newUserData);
 
-      return null;
-    });
+    const addingTranslationResponse = await addTranslations(userData);
+
+    if (addingTranslationResponse.result !== "ok") {
+      setError(addingTranslationResponse.error.message);
+    }
+
+    return true;
   };
 
   const handleToggleServerConnection = async () => {
-    if (isServerOn) {
-      chrome.storage.sync.set({
-        userData: { ...user, isServerOn: false },
-      });
-
-      return setIsServerOn(false);
-    }
-
     try {
+      if (isServerOn) {
+        await chromeStore.set("userData", { ...user, isServerOn: false });
+
+        return setIsServerOn(false);
+      }
+
       const loginResult = await login(user);
 
       if (loginResult.result !== "ok") {
@@ -147,26 +131,25 @@ export default function Popup() {
 
       const newUserData = { ...user, glossaryId: loginResult.glossaryId };
 
-      chrome.storage.sync.set({ userData: newUserData });
+      await chromeStore.set("userData", newUserData);
       setUser(newUserData);
 
-      updateUserSigningStatus(loginResult.isUser);
+      await updateUserSigningStatus(loginResult.isUser);
 
       if (loginResult.isUser) {
-        synchronizeUserAndServer();
+        await synchronizeUserAndServer();
       }
 
       return setIsServerOn(true);
     } catch (err) {
       setError(err.message);
+      return setIsServerOn(false);
     }
-
-    return setIsServerOn(false);
   };
 
-  const handleSignupResult = (isSignupSuccess) => {
+  const handleSignupResult = async (isSignupSuccess) => {
     setIsServerOn(isSignupSuccess);
-    updateUserSigningStatus(isSignupSuccess);
+    await updateUserSigningStatus(isSignupSuccess);
   };
 
   const handleChangeTextarea = ({ target: { value } }) => {
@@ -174,11 +157,12 @@ export default function Popup() {
   };
 
   const googleTranslate = async () => {
-    chrome.storage.sync.get("currentUrl", async ({ currentUrl }) => {
+    try {
       const translated = await getTranslationFromGoogleCloudAPI(
         user,
         originText,
       );
+      const currentUrl = await chromeStore.get("currentUrl");
 
       if (translated.error) {
         return setError("구글 API 번역 요청 중 에러가 발생했습니다.");
@@ -195,64 +179,72 @@ export default function Popup() {
         nanoId: nanoid(),
       };
 
-      chrome.storage.sync.set({
-        userData: {
-          ...user,
-          translations: user.translations.concat(currentTranslationResult),
-        },
-      });
-
       if (isServerOn) {
-        const response = await sendTranslationResult(
+        const sendingTranslationResponse = await sendTranslationResult(
           user,
           currentTranslationResult,
         );
 
-        if (response.result !== "ok") {
+        if (sendingTranslationResponse.result !== "ok") {
           setError("서버에 번역 결과를 저장하는데 실패했습니다.");
         }
       }
+
+      const newUserData = {
+        ...user,
+        translations: user.translations.concat(currentTranslationResult),
+      };
+
+      await chromeStore.set("userData", newUserData);
 
       return setTranslationResult({
         translation: translatedText,
         notification: "구글 API",
         glossary: user.glossary,
       });
-    });
+    } catch (err) {
+      return setError(err.message);
+    }
   };
 
   const handleClickTranslation = async () => {
+    setError("");
+
     try {
-      let translated = await getTranslationFromChromeStorage(
+      const localTranslation = await getTranslationFromChromeStorage(
         user.translations,
         originText,
       );
 
-      if (translated) {
+      if (localTranslation) {
         return setTranslationResult({
-          translation: translated.translated,
+          translation: localTranslation.translated,
           notification: "로컬 스토리지",
-          glossary: translated.glossary,
+          glossary: localTranslation.glossary,
         });
       }
 
       if (isServerOn) {
-        translated = await getTranslationFromServer(user, originText);
+        const serverTranslation = await getTranslationFromServer(
+          user,
+          originText,
+        );
 
-        if (translated.result !== "ok") {
-          return setError(translated.error.message);
+        if (serverTranslation.result !== "ok") {
+          setError(serverTranslation.error.message);
+        } else if (
+          serverTranslation.result === "ok" &&
+          serverTranslation.data
+        ) {
+          return setTranslationResult({
+            translation: serverTranslation.data.translated,
+            notification: "서버",
+            glossary: serverTranslation.data.glossary,
+          });
         }
       }
 
-      if (isServerOn && translated.data) {
-        return setTranslationResult({
-          translation: translated.data.translated,
-          notification: "서버",
-          glossary: translated.data.glossary,
-        });
-      }
-
-      return googleTranslate();
+      return await googleTranslate();
     } catch (err) {
       return setError(err.message || err.error.message);
     }

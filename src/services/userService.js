@@ -1,9 +1,9 @@
-import { URLS } from "../constants/user";
+import endPoints from "../constants/server";
 
-const { USERS, LOGIN, SIGNUP, GLOSSARY, GLOSSARIES, TRANSLATIONS } = URLS;
+const { USERS, LOGIN, SIGNUP, GLOSSARY, GLOSSARIES, TRANSLATIONS } = endPoints;
 
 export const login = async (user) => {
-  const response = await fetch(process.env.SERVER_URL + USERS + LOGIN, {
+  const response = await fetch(`${process.env.SERVER_URL}${USERS}${LOGIN}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -22,7 +22,7 @@ export const signup = async (
   { email, name, glossary, clientId, tokens },
   keywords,
 ) => {
-  const response = await fetch(process.env.SERVER_URL + USERS + SIGNUP, {
+  const response = await fetch(`${process.env.SERVER_URL}${USERS}${SIGNUP}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -51,7 +51,7 @@ export const getGlossary = async ({ email, tokens }) => {
 
 export const editGlossary = async ({ tokens, glossaryId, glossary }) => {
   const response = await fetch(
-    `${process.env.SERVER_URL + GLOSSARIES}/${glossaryId}`,
+    `${process.env.SERVER_URL}${GLOSSARIES}/${glossaryId}`,
     {
       method: "PATCH",
       headers: {
@@ -66,7 +66,7 @@ export const editGlossary = async ({ tokens, glossaryId, glossary }) => {
 };
 
 export const addTranslations = async ({ tokens, email, translations }) => {
-  const response = await fetch(process.env.SERVER_URL + TRANSLATIONS, {
+  const response = await fetch(`${process.env.SERVER_URL}${TRANSLATIONS}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

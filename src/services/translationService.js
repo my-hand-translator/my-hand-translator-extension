@@ -1,10 +1,11 @@
-import { URLS } from "../constants/user";
+import endPoints from "../constants/server";
+import chromeStore from "../utils/chromeStore";
+
+const { WORDS, TRANSLATED, TRANSLATIONS } = endPoints;
 
 const DECIMAL_POINT = 2;
 const PERCENTAGE = 100;
 const SIMILARITY = 95;
-
-const { WORDS, TRANSLATED, TRANSLATIONS } = URLS;
 
 export const getTranslations = async (user, params) => {
   const response = await fetch(
@@ -122,13 +123,11 @@ const refreshAndGetNewTokens = async (clientId, clientSecret, refreshToken) => {
     error,
     error_description: errorDescription,
   } = await response.json();
-  chrome.storage.sync.get(["userData"], ({ userData }) => {
-    chrome.storage.sync.set({
-      userData: {
-        ...userData,
-        tokens: { ...userData.tokens, accessToken, idToken },
-      },
-    });
+
+  const userData = await chromeStore.get("userData");
+  await chromeStore.set("userData", {
+    ...userData,
+    tokens: { ...userData.tokens, accessToken, idToken },
   });
 
   if (error) {
@@ -154,7 +153,7 @@ export const getTranslationFromGoogleCloudAPI = async (
     body: JSON.stringify({
       sourceLanguageCode: "en",
       targetLanguageCode: "ko",
-      contents: originText,
+      contents: originText.toLowerCase(),
       glossaryConfig: {
         glossary: `projects/${projectId}/locations/us-central1/glossaries/my-glossary`,
       },
@@ -164,9 +163,16 @@ export const getTranslationFromGoogleCloudAPI = async (
   return response.json();
 };
 
-export const getGlossaryFromGoogleCloudAPI = async (accessToken) => {
-  const url =
-    "https://storage.googleapis.com/storage/v1/b/my-hand-translator/o/my-glossary.csv?alt=media";
+export const getGlossaryFromGoogleCloudAPI = async ({
+  email,
+  clientId,
+  clientSecret,
+  tokens: { accessToken, refreshToken },
+}) => {
+  await refreshAndGetNewTokens(clientId, clientSecret, refreshToken);
+
+  const bucketName = email.replace(/@|\./g, "");
+  const url = `https://storage.googleapis.com/storage/v1/b/${bucketName}/o/my-glossary.csv?alt=media`;
 
   const response = await fetch(url, {
     headers: {
@@ -177,12 +183,11 @@ export const getGlossaryFromGoogleCloudAPI = async (accessToken) => {
 
   const data = await response.text();
 
-  if (data === "No such object: my-hand-translator/my-glossary.csv") {
+  if (data === `No such object: ${bucketName}/my-glossary.csv`) {
     return null;
   }
 
   const wordPairs = data.split("\r\n").map((wordPair) => wordPair.split(","));
-
   const glossary = wordPairs.reduce(
     (prev, [origin, target]) => ({ ...prev, [origin]: target }),
     {},
@@ -196,7 +201,7 @@ export const sendTranslationResult = async (
   currentTranslationResult,
 ) => {
   const response = await fetch(
-    `${process.env.SERVER_URL + TRANSLATIONS}/${email}`,
+    `${process.env.SERVER_URL}${TRANSLATIONS}/${email}`,
     {
       method: "POST",
       headers: {
