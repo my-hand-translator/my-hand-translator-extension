@@ -56,8 +56,6 @@ export const editGlossary = async ({
   glossary,
   clientId,
 }) => {
-  console.log("glo id", glossaryId);
-
   const response = await fetch(
     `${process.env.SERVER_URL}${GLOSSARIES}/${glossaryId}`,
     {

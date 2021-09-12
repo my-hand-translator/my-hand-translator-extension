@@ -123,7 +123,11 @@ export default function Popup() {
         throw loginResult;
       }
 
-      const newUserData = { ...user, glossaryId: loginResult.glossaryId };
+      const newUserData = {
+        ...user,
+        glossaryId: loginResult.glossaryId,
+        isServerOn: true,
+      };
 
       await chromeStore.set("userData", newUserData);
       await chromeStore.set("glossaryId", loginResult.glossaryId);
