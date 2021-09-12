@@ -132,6 +132,8 @@ export default function Popup() {
       const newUserData = { ...user, glossaryId: loginResult.glossaryId };
 
       await chromeStore.set("userData", newUserData);
+      await chromeStore.set("glossaryId", loginResult.glossaryId);
+
       setUser(newUserData);
 
       await updateUserSigningStatus(loginResult.isUser);
