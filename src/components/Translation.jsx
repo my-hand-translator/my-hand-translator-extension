@@ -1,12 +1,38 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import TextBox from "./shared/TextBox";
+import { styled } from "../config/stitches.config";
+
 import SubTitle from "./shared/SubTitle";
 import ContainerStyled from "./shared/Container";
 import Button from "./shared/Button";
 
-import { styled } from "../config/stitches.config";
+const TextBox = styled("p", {
+  color: "$black",
+  padding: "10px",
+  fontSize: "20px",
+  borderRadius: "10px",
+
+  variants: {
+    color: {
+      blue: { color: "$blue" },
+      lightBlue: { color: "$lightBlue" },
+      apricot: { color: "$apricot" },
+      white: { color: "$white" },
+    },
+
+    fontSize: {
+      big: { fontSize: "30px" },
+      small: { fontSize: "10px" },
+    },
+
+    border: {
+      black: {
+        border: "1px solid $black",
+      },
+    },
+  },
+});
 
 const Textarea = styled("textarea", {
   padding: "10px",
@@ -32,6 +58,7 @@ export default function Translation({
   handleChangeTextarea,
   translationResult,
   originText,
+  isOnWebPage,
 }) {
   const { translation, notification, glossary } = translationResult;
 
@@ -44,7 +71,8 @@ export default function Translation({
           boxType="translation"
           type="text"
           placeholder="번역할 문장을 입력해주세요."
-          onChange={handleChangeTextarea}
+          onChange={handleChangeTextarea || (() => {})}
+          readOnly={isOnWebPage}
         >
           {originText}
         </Textarea>
@@ -56,7 +84,7 @@ export default function Translation({
           <SubTitle fontSize="middle" color="apricot">
             {notification} 에서 찾은 번역 결과입니다.
             {notification !== "구글 API" && (
-              <Button onClick={handleClickGoogleTranslate}>
+              <Button onClick={() => handleClickGoogleTranslate(originText)}>
                 내 용어집으로 번역하기
               </Button>
             )}
@@ -85,8 +113,9 @@ Translation.propTypes = {
     translation: PropTypes.string,
     notification: PropTypes.string,
   }),
-  handleChangeTextarea: PropTypes.func.isRequired,
+  handleChangeTextarea: PropTypes.func,
   handleClickGoogleTranslate: PropTypes.func.isRequired,
+  isOnWebPage: PropTypes.bool,
 };
 
 Translation.defaultProps = {
@@ -95,4 +124,6 @@ Translation.defaultProps = {
     translation: "",
     notification: "",
   },
+  isOnWebPage: false,
+  handleChangeTextarea: null,
 };

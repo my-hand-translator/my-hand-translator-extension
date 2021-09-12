@@ -12,7 +12,7 @@ module.exports = {
   entry: {
     popup: path.resolve(__dirname, "./src/index-popup.jsx"),
     options: path.resolve(__dirname, "./src/index-options.jsx"),
-    mouseDrag: path.resolve(__dirname, "./src/index-mouseDrag.jsx"),
+    textSelection: path.resolve(__dirname, "./src/index-textSelection.jsx"),
   },
   output: {
     path: path.join(__dirname, "./dist"),

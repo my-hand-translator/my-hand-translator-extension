@@ -74,10 +74,10 @@ function EditGlossary() {
             setErrorMassage,
           );
 
-          Object.assign(dataFromGoogle.glossayData, dataFromServer);
+          Object.assign(dataFromGoogle.glossaryData, dataFromServer);
         }
 
-        setGlossary(dataFromGoogle.glossayData);
+        setGlossary(dataFromGoogle.glossaryData);
         setIsLoading(false);
       })();
     }
@@ -197,7 +197,7 @@ function EditGlossary() {
     <TabContainer>
       <ContainerStyled justify="spaceBetween">
         <Title>{user.glossary ? "용어집 편집" : "용어집 생성"}</Title>
-        <Button size="midium" onClick={handleEditGlossary}>
+        <Button size="medium" onClick={handleEditGlossary}>
           제출
         </Button>
       </ContainerStyled>

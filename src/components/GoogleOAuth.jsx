@@ -75,6 +75,7 @@ export default function GoogleOAuth({ handleOAuthResult }) {
               chrome.storage.sync.set({
                 userData: {
                   email,
+                  oAuth: true,
                   clientId: formData.clientId,
                   clientSecret: formData.clientSecret,
                   projectId: formData.projectId,

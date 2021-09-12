@@ -4,6 +4,7 @@ const ContainerStyled = styled("div", {
   display: "flex",
   padding: "10px",
   borderRadius: "10px",
+  backgroundColor: "white",
 
   variants: {
     flex: {

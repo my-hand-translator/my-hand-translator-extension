@@ -1,6 +1,6 @@
-const handleMouseDragEnd = () => {
+const injectTextSelectionComponent = () => {
   const div = document.createElement("div");
-  div.id = "mouseDrag";
+  div.id = "textSelection";
   document.body.appendChild(div);
 };
 
@@ -13,11 +13,11 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     try {
       await chrome.scripting.executeScript({
         target: { tabId },
-        function: handleMouseDragEnd,
+        function: injectTextSelectionComponent,
       });
       await chrome.scripting.executeScript({
         target: { tabId },
-        files: ["./mouseDrag.bundle.js"],
+        files: ["./textSelection.bundle.js"],
       });
     } catch (error) {
       console.log(error);
