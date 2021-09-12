@@ -1,14 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useHistory } from "react-router-dom";
 
-import Button from "./shared/Button";
-import Title from "./shared/Title";
-import SubTitle from "./shared/SubTitle";
-import ErrorStyled from "./shared/Error";
-import ContainerStyled from "./shared/Container";
-import TabContainer from "./shared/TabContainer";
 import chromeStore from "../utils/chromeStore";
-
 import {
   createBucket,
   createGlossaryFromGoogleTranslation,
@@ -17,6 +10,14 @@ import {
   updateCsvFromGoogleStorage,
   updateGlossaryFromServer,
 } from "../services/glossaryService";
+
+import GlossaryList from "./GlossaryList";
+import Button from "./shared/Button";
+import Title from "./shared/Title";
+import SubTitle from "./shared/SubTitle";
+import ErrorStyled from "./shared/Error";
+import ContainerStyled from "./shared/Container";
+import TabContainer from "./shared/TabContainer";
 
 const initWordsToAdd = {
   text: "",
@@ -228,19 +229,13 @@ function EditGlossary() {
         </ContainerStyled>
       </form>
 
-      {glossary &&
-        Object.keys(glossary).map((text) => {
-          return (
-            <ContainerStyled id={text} justify="spaceEvenly" align="itemCenter">
-              <div name="text">{text} </div>
-              <p>{"->"}</p>
-              <div name="translation">{glossary[text]} </div>
-              <Button size="small" onClick={() => handleDeleteGlossary(text)}>
-                삭제
-              </Button>
-            </ContainerStyled>
-          );
-        })}
+      {glossary && (
+        <GlossaryList
+          glossaries={glossary}
+          buttonText="삭제"
+          onButtonClick={handleDeleteGlossary}
+        />
+      )}
     </TabContainer>
   );
 }
