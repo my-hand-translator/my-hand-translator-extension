@@ -14,6 +14,7 @@ import { globalCss } from "../config/stitches.config";
 import Layout from "./shared/layouts";
 import EditGlossary from "./EditGlossary";
 import Popup from "./Popup";
+import OtherGlossaries from "./OtherGlossaries";
 
 function Options() {
   globalCss(reset)();
@@ -34,7 +35,7 @@ function Options() {
             <MyTranslations />
           </Route>
           <Route exact path="/other-glossaries">
-            <div>Other Glossaries</div>
+            <OtherGlossaries />
           </Route>
         </Switch>
       </Layout>
