@@ -1,6 +1,6 @@
-import endPoints from "../constants/server";
+import END_POINTS from "../constants/server";
 
-const { USERS, LOGIN, SIGNUP, GLOSSARY, GLOSSARIES, TRANSLATIONS } = endPoints;
+const { USERS, LOGIN, SIGNUP, GLOSSARY, GLOSSARIES, TRANSLATIONS } = END_POINTS;
 
 export const login = async (user) => {
   const response = await fetch(`${process.env.SERVER_URL}${USERS}${LOGIN}`, {
@@ -35,13 +35,14 @@ export const signup = async (
   return response.json();
 };
 
-export const getGlossary = async ({ email, tokens }) => {
+export const getGlossary = async ({ email, tokens, clientId }) => {
   const response = await fetch(
     `${process.env.SERVER_URL}${USERS}/${email}${GLOSSARY}`,
     {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${tokens.idToken}`,
+        "Client-Id": clientId,
       },
     },
   );
@@ -49,7 +50,14 @@ export const getGlossary = async ({ email, tokens }) => {
   return response.json();
 };
 
-export const editGlossary = async ({ tokens, glossaryId, glossary }) => {
+export const editGlossary = async ({
+  tokens,
+  glossaryId,
+  glossary,
+  clientId,
+}) => {
+  console.log("glo id", glossaryId);
+
   const response = await fetch(
     `${process.env.SERVER_URL}${GLOSSARIES}/${glossaryId}`,
     {
@@ -57,6 +65,7 @@ export const editGlossary = async ({ tokens, glossaryId, glossary }) => {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${tokens.idToken}`,
+        "Client-Id": clientId,
       },
       body: JSON.stringify({ glossary }),
     },
@@ -65,12 +74,18 @@ export const editGlossary = async ({ tokens, glossaryId, glossary }) => {
   return response.json();
 };
 
-export const addTranslations = async ({ tokens, email, translations }) => {
+export const addTranslations = async ({
+  tokens,
+  email,
+  translations,
+  clientId,
+}) => {
   const response = await fetch(`${process.env.SERVER_URL}${TRANSLATIONS}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${tokens.idToken}`,
+      "Client-Id": clientId,
     },
     body: JSON.stringify({ email, translations }),
   });

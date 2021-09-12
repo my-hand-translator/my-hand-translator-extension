@@ -72,9 +72,7 @@ export default function Popup() {
     setUser(newUser);
   };
 
-  const synchronizeUserAndServer = async () => {
-    const userData = await chromeStore.get("userData");
-
+  const synchronizeUserAndServer = async (userData) => {
     if (!userData) {
       return setError("유저 데이터가 없습니다.");
     }
@@ -135,12 +133,13 @@ export default function Popup() {
       await updateUserSigningStatus(loginResult.isUser);
 
       if (loginResult.isUser) {
-        await synchronizeUserAndServer();
+        await synchronizeUserAndServer(newUserData);
       }
 
       return setIsServerOn(true);
     } catch (err) {
       setError(err.message);
+
       return setIsServerOn(false);
     }
   };

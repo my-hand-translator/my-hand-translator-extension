@@ -92,7 +92,11 @@ export const getTranslationFromChromeStorage = (translations, originText) => {
   return translation;
 };
 
-export const getTranslationFromServer = async (idToken, originText) => {
+export const getTranslationFromServer = async ({
+  clientId,
+  idToken,
+  originText,
+}) => {
   const response = await fetch(
     `${process.env.SERVER_URL + WORDS + TRANSLATED}?words=${originText}`,
     {
@@ -100,6 +104,7 @@ export const getTranslationFromServer = async (idToken, originText) => {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${idToken}`,
+        "Client-Id": clientId,
       },
     },
   );
@@ -245,6 +250,7 @@ export const googleTranslate = async (user, originText) => {
 
 export const getTranslationResult = async (user, originText) => {
   const {
+    clientId,
     translations,
     isServerOn,
     tokens: { idToken },
@@ -263,10 +269,11 @@ export const getTranslationResult = async (user, originText) => {
   }
 
   if (isServerOn) {
-    const serverTranslation = await getTranslationFromServer(
+    const serverTranslation = await getTranslationFromServer({
+      clientId,
       idToken,
       originText,
-    );
+    });
 
     if (serverTranslation.result !== "ok") {
       throw serverTranslation.error.message;
