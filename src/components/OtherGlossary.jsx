@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import Container from "./shared/Container";
 
 import { styled } from "../config/stitches.config";
+import { OTHER_GLOSSARIES } from "../constants/url";
 
 const GlossaryContainer = styled(Container, {
   width: "50%",
@@ -29,7 +30,7 @@ export default function OtherGlossary({ glossary }) {
 
   return (
     <GlossaryContainer justify="center" align="center">
-      <LinkStyled to={glossary.userEmail}>
+      <LinkStyled to={`${OTHER_GLOSSARIES}/${glossary.userEmail}`}>
         <Container justify="center" align="center">
           <span>{glossary.userEmail}의 용어집</span>
         </Container>

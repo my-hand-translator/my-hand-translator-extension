@@ -7,4 +7,4 @@ exports.POPUP = "/popup";
 exports.MY_GLOSSARY = "/my-glossary";
 exports.MY_TRANSLATIONS = "/my-translations";
 exports.OTHER_GLOSSARIES = "/other-glossaries";
-exports.OTHER_GLOSSARY = "/other-glossary/:userId";
+exports.OTHER_GLOSSARY = "/other-glossaries/:userId";

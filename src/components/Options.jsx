@@ -1,6 +1,13 @@
 import React from "react";
 import { HashRouter as Router, Switch, Route } from "react-router-dom";
+
 import MyTranslations from "./MyTranslations";
+import EditGlossary from "./EditGlossary";
+import Popup from "./Popup";
+import DetailOtherGlossary from "./DetailOtherGlossary";
+import Layout from "./shared/layouts";
+import TabContainer from "./shared/TabContainer";
+import OtherGlossaries from "./OtherGlossaries";
 
 import {
   MY_GLOSSARY,
@@ -9,13 +16,6 @@ import {
   OTHER_GLOSSARY,
   POPUP,
 } from "../constants/url";
-
-import EditGlossary from "./EditGlossary";
-import OtherGlossary from "./OtherGlossary";
-import OtherGlossaries from "./OtherGlossaries";
-import Popup from "./Popup";
-import Layout from "./shared/layouts";
-import TabContainer from "./shared/TabContainer";
 
 function Options() {
   return (
@@ -40,7 +40,7 @@ function Options() {
             <OtherGlossaries />
           </Route>
           <Route exact path={OTHER_GLOSSARY}>
-            <OtherGlossary />
+            <DetailOtherGlossary />
           </Route>
         </Switch>
       </Layout>

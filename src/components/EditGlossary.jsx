@@ -1,7 +1,16 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useHistory } from "react-router-dom";
 
+import GlossaryList from "./GlossaryList";
+import Button from "./shared/Button";
+import Title from "./shared/Title";
+import SubTitle from "./shared/SubTitle";
+import ErrorStyled from "./shared/Error";
+import ContainerStyled from "./shared/Container";
+import TabContainer from "./shared/TabContainer";
+
 import chromeStore from "../utils/chromeStore";
+import { convertObjectToCsv } from "../utils/convert";
 import {
   createBucket,
   createGlossaryFromGoogleTranslation,
@@ -10,14 +19,6 @@ import {
   updateCsvFromGoogleStorage,
   updateGlossaryFromServer,
 } from "../services/glossaryService";
-
-import GlossaryList from "./GlossaryList";
-import Button from "./shared/Button";
-import Title from "./shared/Title";
-import SubTitle from "./shared/SubTitle";
-import ErrorStyled from "./shared/Error";
-import ContainerStyled from "./shared/Container";
-import TabContainer from "./shared/TabContainer";
 
 const initWordsToAdd = {
   text: "",
@@ -45,7 +46,7 @@ function EditGlossary() {
         setUser(userData);
       } catch (error) {
         setIsLoading(false);
-        setErrorMassage(error);
+        setErrorMassage(error.message);
       }
     })();
   }, []);
@@ -143,17 +144,10 @@ function EditGlossary() {
       await createBucket({ bucketId, projectId, accessToken }, setErrorMassage);
     }
 
-    const glossaryKeys = Object.keys(glossary);
-    let csv = "";
-
-    for (let i = 0; i < glossaryKeys.length; i += 1) {
-      const key = glossaryKeys[i];
-
-      csv += `${key},${glossary[key]}\r\n`;
-    }
+    const glossaryToCsv = convertObjectToCsv(glossary);
 
     await updateCsvFromGoogleStorage(
-      { csv, bucketId, accessToken },
+      { csv: glossaryToCsv, bucketId, accessToken },
       setErrorMassage,
     );
 

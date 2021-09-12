@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+
 import ContainerStyled from "./shared/Container";
 import Button from "./shared/Button";
 
@@ -12,7 +13,10 @@ function GlossaryList({ glossaries, buttonText, onButtonClick }) {
             <div name="text">{text} </div>
             <p>{"->"}</p>
             <div name="translation">{glossaries[text]} </div>
-            <Button size="small" onClick={() => onButtonClick(text)}>
+            <Button
+              size="small"
+              onClick={() => onButtonClick(text, glossaries[text])}
+            >
               {buttonText}
             </Button>
           </ContainerStyled>

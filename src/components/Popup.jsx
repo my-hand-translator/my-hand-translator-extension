@@ -42,10 +42,10 @@ export default function Popup() {
         if (userData) {
           const glossary = await getGlossaryFromGoogleCloudAPI(userData);
 
+          await chromeStore.set("userData", { ...userData, glossary });
+
           setUser(userData);
           setIsServerOn(userData.isServerOn);
-
-          await chromeStore.set("userData", { ...userData, glossary });
 
           return setIsOAuthSuccess(true);
         }
