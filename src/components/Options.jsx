@@ -1,10 +1,5 @@
 import React from "react";
-import {
-  HashRouter as Router,
-  Switch,
-  Route,
-  Redirect,
-} from "react-router-dom";
+import { HashRouter as Router, Switch, Route } from "react-router-dom";
 import MyTranslations from "./MyTranslations";
 
 import reset from "../config/reset";
@@ -15,6 +10,7 @@ import Layout from "./shared/layouts";
 import EditGlossary from "./EditGlossary";
 import Popup from "./Popup";
 import OtherGlossaries from "./OtherGlossaries";
+import TabContainer from "./shared/TabContainer";
 
 function Options() {
   globalCss(reset)();
@@ -23,7 +19,9 @@ function Options() {
       <Layout>
         <Switch>
           <Route exact path="/">
-            <Redirect to="/options.html" />
+            <TabContainer>
+              <Popup />
+            </TabContainer>
           </Route>
           <Route exact path="/popup">
             <Popup />

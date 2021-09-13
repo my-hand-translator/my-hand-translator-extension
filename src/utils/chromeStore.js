@@ -19,7 +19,7 @@ const set = (key, data) => {
         rej(ERROR.SET_CHROME_STORAGE);
       }
 
-      res(true);
+      res(data);
     });
   });
 };
