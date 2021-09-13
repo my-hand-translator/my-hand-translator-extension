@@ -2,6 +2,7 @@ import { PROJECT_API, STORAGE_API, STORAGE_UPLOAD_API } from "../constants/url";
 
 import { convertCsvToJson } from "../utils/convert";
 import fetchData, { createAuthHeader } from "../utils/fetchData";
+import { refreshAndGetNewTokens } from "./oAuthService";
 
 const GLOSSARY_NAME = "my-glossary";
 
@@ -27,9 +28,11 @@ export const getGlossaries = async (user, page, limit, keyword = "") => {
 };
 
 export const getCsvFromGoogleStorage = async (
-  { accessToken, bucketId },
+  { bucketId, clientId, clientSecret },
+  tokens,
   errorHandler,
 ) => {
+  const { accessToken, refreshToken } = tokens;
   const authHeader = createAuthHeader(accessToken);
 
   try {
@@ -48,6 +51,24 @@ export const getCsvFromGoogleStorage = async (
         hasBucket = false;
         return { hasBucket };
       }
+
+      if (result === "Invalid Credentials") {
+        const { accessToken: newAccessToken } = await refreshAndGetNewTokens(
+          clientId,
+          clientSecret,
+          refreshToken,
+        );
+
+        return await getCsvFromGoogleStorage(
+          {
+            bucketId,
+            clientId,
+            clientSecret,
+          },
+          { accessToken: newAccessToken, refreshToken },
+          errorHandler,
+        );
+      }
     }
 
     hasBucket = true;
@@ -62,13 +83,15 @@ export const getCsvFromGoogleStorage = async (
 };
 
 export const updateCsvFromGoogleStorage = async (
-  { csv, bucketId, accessToken },
+  { csv, bucketId, clientId, clientSecret },
+  tokens,
   errorHandler,
 ) => {
+  const { accessToken, refreshToken } = tokens;
   const authHeader = createAuthHeader(accessToken);
 
   try {
-    await fetch(
+    const response = await fetch(
       `${STORAGE_UPLOAD_API}/${bucketId}/o?uploadType=media&name=${GLOSSARY_NAME}.csv`,
       {
         method: "POST",
@@ -79,9 +102,27 @@ export const updateCsvFromGoogleStorage = async (
         body: csv,
       },
     );
+
+    const { error } = await response.json();
+
+    if (error?.message === "Invalid Credentials") {
+      const { accessToken: newAccessToken } = await refreshAndGetNewTokens(
+        clientId,
+        clientSecret,
+        refreshToken,
+      );
+
+      return await updateCsvFromGoogleStorage(
+        { csv, bucketId, clientId, clientSecret },
+        { accessToken: newAccessToken, refreshToken },
+        errorHandler,
+      );
+    }
   } catch (error) {
     errorHandler(error.message);
   }
+
+  return null;
 };
 
 export const getGlossaryFromServer = async (
