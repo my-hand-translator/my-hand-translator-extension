@@ -13,7 +13,7 @@ import chromeStore from "../utils/chromeStore";
 import debounce from "../utils/utils";
 
 const HeaderContainer = styled(Container, {
-  marginBottom: "2em",
+  marginBottom: "1em",
 });
 
 const GlossaryContainer = styled(Container, {

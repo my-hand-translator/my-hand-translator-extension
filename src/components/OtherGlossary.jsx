@@ -8,7 +8,7 @@ import { styled } from "../config/stitches.config";
 import { OTHER_GLOSSARIES } from "../constants/url";
 
 const GlossaryContainer = styled(Container, {
-  width: "50%",
+  width: "650px",
   padding: "2em",
 
   boxShadow: "0 2px 10px rgba(0, 0, 0, 0.3)",
@@ -29,8 +29,8 @@ export default function OtherGlossary({ glossary }) {
   } = glossary;
 
   return (
-    <GlossaryContainer justify="center" align="center">
-      <LinkStyled to={`${OTHER_GLOSSARIES}/${glossary.userEmail}`}>
+    <LinkStyled to={`${OTHER_GLOSSARIES}/${glossary.userEmail}`}>
+      <GlossaryContainer justify="center" align="center">
         <Container justify="center" align="center">
           <span>{glossary.userEmail}의 용어집</span>
         </Container>
@@ -46,8 +46,8 @@ export default function OtherGlossary({ glossary }) {
               );
             })}
         </Container>
-      </LinkStyled>
-    </GlossaryContainer>
+      </GlossaryContainer>
+    </LinkStyled>
   );
 }
 
