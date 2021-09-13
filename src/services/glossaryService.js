@@ -1,6 +1,6 @@
 import { PROJECT_API, STORAGE_API, STORAGE_UPLOAD_API } from "../constants/url";
 
-import convertCsvToJson from "../utils/convertCsvToJson";
+import { convertCsvToJson } from "../utils/convert";
 import fetchData, { createAuthHeader } from "../utils/fetchData";
 
 const GLOSSARY_NAME = "my-glossary";

@@ -7,7 +7,7 @@ import OtherGlossary from "./OtherGlossary";
 
 import Button from "./shared/Button";
 
-import getGlossaries from "../services/glossaryService";
+import { getGlossaries } from "../services/glossaryService";
 import { styled } from "../config/stitches.config";
 import chromeStore from "../utils/chromeStore";
 import debounce from "../utils/utils";

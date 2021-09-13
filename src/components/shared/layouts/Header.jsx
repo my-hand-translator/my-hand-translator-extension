@@ -1,9 +1,14 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-
 import { styled } from "../../../config/stitches.config";
-import ContainerStyled from "../Container";
 
+import {
+  MY_GLOSSARY,
+  MY_TRANSLATIONS,
+  OTHER_GLOSSARIES,
+} from "../../../constants/url";
+
+import ContainerStyled from "../Container";
 import TabContainer from "../TabContainer";
 
 function Header() {
@@ -25,14 +30,14 @@ function Header() {
             <NavLink to="/" exact activeClassName="selected">
               번역하기
             </NavLink>
-            <NavLink to="/my-glossary" activeClassName="selected">
+            <NavLink to={MY_GLOSSARY} activeClassName="selected">
               내 용어집 편집
             </NavLink>
-            <NavLink to="/my-translations" activeClassName="selected">
-              My Translations
+            <NavLink to={MY_TRANSLATIONS} activeClassName="selected">
+              내 번역 기록
             </NavLink>
-            <NavLink to="/other-glossaries" activeClassName="selected">
-              Other Glossaries
+            <NavLink to={OTHER_GLOSSARIES} activeClassName="selected">
+              다른 사람 용어집
             </NavLink>
           </Nav>
         </ContainerStyled>

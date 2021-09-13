@@ -61,6 +61,7 @@ export default function Translation({
   isOnWebPage,
 }) {
   const { translation, notification, glossary } = translationResult;
+  const glossaryEntries = Object.entries(glossary || {});
 
   return (
     <ContainerStyled flex="column" border="black">
@@ -97,11 +98,9 @@ export default function Translation({
 
         <SubTitle>사용한 용어집</SubTitle>
         <ul>
-          {glossary &&
-            glossary.length > 0 &&
-            Object.entries(glossary).map(([origin, target]) => (
-              <li key={origin}>{`[${origin}]을 [${target}]로 번역`}</li>
-            ))}
+          {glossaryEntries.map(([origin, target]) => (
+            <li key={origin}>{`[${origin}]을 [${target}]로 번역`}</li>
+          ))}
         </ul>
       </ContainerStyled>
     </ContainerStyled>
