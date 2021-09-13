@@ -71,7 +71,7 @@ export default function Translation({
           boxType="translation"
           type="text"
           placeholder="번역할 문장을 입력해주세요."
-          onChange={handleChangeTextarea || (() => {})}
+          onChange={handleChangeTextarea}
           readOnly={isOnWebPage}
         >
           {originText}
@@ -98,6 +98,7 @@ export default function Translation({
         <SubTitle>사용한 용어집</SubTitle>
         <ul>
           {glossary &&
+            glossary.length > 0 &&
             Object.entries(glossary).map(([origin, target]) => (
               <li key={origin}>{`[${origin}]을 [${target}]로 번역`}</li>
             ))}
@@ -125,5 +126,5 @@ Translation.defaultProps = {
     notification: "",
   },
   isOnWebPage: false,
-  handleChangeTextarea: null,
+  handleChangeTextarea: () => {},
 };

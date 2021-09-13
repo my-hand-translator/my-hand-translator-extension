@@ -99,8 +99,7 @@ export default function TextSelection() {
   };
 
   return (
-    user &&
-    user.oAuth && (
+    user && (
       <PageTranslationContainer ref={boxRef} css={boxPosition}>
         {isBoxVisible ? (
           <ContainerStyled flex="column">
