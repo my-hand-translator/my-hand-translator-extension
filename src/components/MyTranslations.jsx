@@ -14,6 +14,7 @@ import {
   getTranslations,
   combineTranslations,
 } from "../services/translationService";
+import chromeStore from "../utils/chromeStore";
 
 const HeaderContainer = styled(Container, {
   marginBottom: "2em",
@@ -48,42 +49,31 @@ function MyTranslations() {
   const observedElement = useRef();
 
   useEffect(() => {
-    chrome.storage.sync.get(["userData"], ({ userData }) => {
-      if (chrome.runtime.lastError) {
-        setError(chrome.runtime.lastError.message);
-      }
+    (async () => {
+      try {
+        const userData = await chromeStore.get("userData");
 
-      chrome.storage.sync.get(
-        ["translations"],
-        async ({ translations: storageTranslations }) => {
-          if (chrome.runtime.lastError) {
-            setError(chrome.runtime.lastError.message);
-          }
+        if (userData?.isServerOn) {
+          const params = createTranslationParam(1, 100);
 
-          if (userData?.isServerOn) {
-            const params = createTranslationParam(1, 100);
+          const serverTransitions = await getTranslations(userData, params);
+          const combinedTranslations = combineTranslations(
+            userData.translations,
+            serverTransitions,
+          );
 
-            try {
-              const serverTransitions = await getTranslations(userData, params);
-              const combinedTranslations = combineTranslations(
-                storageTranslations,
-                serverTransitions,
-              );
-
-              setTranslations(combinedTranslations);
-              setSplitIndex(SPLIT_UNIT);
-
-              return;
-            } catch (err) {
-              setError(err.message);
-            }
-          }
-
-          setTranslations(storageTranslations);
+          setTranslations(combinedTranslations);
           setSplitIndex(SPLIT_UNIT);
-        },
-      );
-    });
+
+          return;
+        }
+
+        setTranslations(userData.translations);
+        setSplitIndex(SPLIT_UNIT);
+      } catch (err) {
+        setError(err.message);
+      }
+    })();
   }, []);
 
   useEffect(() => {
@@ -115,14 +105,12 @@ function MyTranslations() {
     setSearchValue(value);
   };
 
-  const handleDeleteButton = (translation) => {
+  const handleDeleteButton = async (translation) => {
     const filteredTranslations = translations.filter((translationToFilter) => {
       return translationToFilter.nanoId !== translation.nanoId;
     });
 
-    chrome.storage.sync.set({
-      translations: filteredTranslations,
-    });
+    chromeStore.set("translations", filteredTranslations);
 
     setTranslations(filteredTranslations);
     setSplitIndex(filteredTranslations.length);
