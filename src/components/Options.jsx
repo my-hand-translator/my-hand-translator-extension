@@ -14,6 +14,7 @@ import TabContainer from "./shared/TabContainer";
 
 function Options() {
   globalCss(reset)();
+
   return (
     <Router>
       <Layout>

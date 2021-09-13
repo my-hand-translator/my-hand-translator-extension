@@ -1,11 +1,16 @@
-export const createAuthHeader = (token) => {
+export const createAuthHeader = (token, clientId) => {
   const authHeader = {
     Authorization: `Bearer ${token}`,
   };
+
+  if (clientId) {
+    authHeader["Client-Id"] = clientId;
+  }
+
   return authHeader;
 };
 
-function fetchData(url, method = "GET", headers = {}, data = {}) {
+const fetchData = (url, method = "GET", headers = {}, data = {}) => {
   const options = {
     method,
     mode: "cors",
@@ -21,6 +26,6 @@ function fetchData(url, method = "GET", headers = {}, data = {}) {
   }
 
   return fetch(url, options).then((response) => response.json());
-}
+};
 
 export default fetchData;

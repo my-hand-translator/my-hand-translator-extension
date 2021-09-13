@@ -1,7 +1,9 @@
-import endPoints from "../constants/server";
+import { nanoid } from "nanoid";
+import END_POINTS from "../constants/server";
 import chromeStore from "../utils/chromeStore";
+import { refreshAndGetNewTokens } from "./oAuthService";
 
-const { WORDS, TRANSLATED, TRANSLATIONS } = endPoints;
+const { WORDS, TRANSLATED, TRANSLATIONS } = END_POINTS;
 
 const DECIMAL_POINT = 2;
 const PERCENTAGE = 100;
@@ -90,14 +92,19 @@ export const getTranslationFromChromeStorage = (translations, originText) => {
   return translation;
 };
 
-export const getTranslationFromServer = async ({ tokens }, originText) => {
+export const getTranslationFromServer = async ({
+  clientId,
+  idToken,
+  originText,
+}) => {
   const response = await fetch(
     `${process.env.SERVER_URL + WORDS + TRANSLATED}?words=${originText}`,
     {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${tokens.idToken}`,
+        Authorization: `Bearer ${idToken}`,
+        "Client-Id": clientId,
       },
     },
   );
@@ -105,41 +112,15 @@ export const getTranslationFromServer = async ({ tokens }, originText) => {
   return response.json();
 };
 
-const refreshAndGetNewTokens = async (clientId, clientSecret, refreshToken) => {
-  const baseUrl = new URL("https://accounts.google.com/o/oauth2/token");
-  const config = {
-    client_id: clientId,
-    client_secret: clientSecret,
-    refresh_token: refreshToken,
-    grant_type: "refresh_token",
-  };
-
-  const params = new URLSearchParams(config).toString();
-  const response = await fetch(`${baseUrl}?${params}`, { method: "POST" });
-
-  const {
-    access_token: accessToken,
-    id_token: idToken,
-    error,
-    error_description: errorDescription,
-  } = await response.json();
-
-  const userData = await chromeStore.get("userData");
-  await chromeStore.set("userData", {
-    ...userData,
-    tokens: { ...userData.tokens, accessToken, idToken },
-  });
-
-  if (error) {
-    throw new Error(errorDescription);
-  }
-};
-
 export const getTranslationFromGoogleCloudAPI = async (
-  { tokens, projectId, clientId, clientSecret },
+  { tokens: { refreshToken }, projectId, clientId, clientSecret },
   originText,
 ) => {
-  await refreshAndGetNewTokens(clientId, clientSecret, tokens.refreshToken);
+  const { accessToken } = await refreshAndGetNewTokens(
+    clientId,
+    clientSecret,
+    refreshToken,
+  );
 
   const baseUrl = "https://translation.googleapis.com/v3/projects/";
   const urlPostFix = "/locations/us-central1:translateText";
@@ -148,7 +129,7 @@ export const getTranslationFromGoogleCloudAPI = async (
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${tokens.accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify({
       sourceLanguageCode: "en",
@@ -167,9 +148,13 @@ export const getGlossaryFromGoogleCloudAPI = async ({
   email,
   clientId,
   clientSecret,
-  tokens: { accessToken, refreshToken },
+  tokens: { refreshToken },
 }) => {
-  await refreshAndGetNewTokens(clientId, clientSecret, refreshToken);
+  const { accessToken } = await refreshAndGetNewTokens(
+    clientId,
+    clientSecret,
+    refreshToken,
+  );
 
   const bucketName = email.replace(/@|\./g, "");
   const url = `https://storage.googleapis.com/storage/v1/b/${bucketName}/o/my-glossary.csv?alt=media`;
@@ -213,4 +198,93 @@ export const sendTranslationResult = async (
   );
 
   return response.json();
+};
+
+export const googleTranslate = async (user, originText) => {
+  const translated = await getTranslationFromGoogleCloudAPI(user, originText);
+
+  if (translated.error) {
+    throw new Error("구글 API 번역 요청 중 에러가 발생했습니다.");
+  }
+
+  const { translatedText } = translated.glossaryTranslations[0];
+  const currentUrl = await chromeStore.get("currentUrl");
+
+  const currentTranslationResult = {
+    text: originText,
+    translated: translatedText,
+    url: currentUrl,
+    glossary: user.glossary,
+    createdAt: new Date().toISOString(),
+    nanoId: nanoid(),
+  };
+
+  if (user.isServerOn) {
+    const sendingTranslationResponse = await sendTranslationResult(
+      user,
+      currentTranslationResult,
+    );
+
+    if (sendingTranslationResponse.result !== "ok") {
+      throw new Error("서버에 번역 결과를 저장하는데 실패했습니다.");
+    }
+  }
+
+  if (user.translations.length >= 5) {
+    user.translations.shift();
+  }
+
+  const newUserData = {
+    ...user,
+    translations: user.translations.concat(currentTranslationResult),
+  };
+
+  await chromeStore.set("userData", newUserData);
+
+  return {
+    translation: translatedText,
+    notification: "구글 API",
+    glossary: user.glossary,
+  };
+};
+
+export const getTranslationResult = async (user, originText) => {
+  const {
+    clientId,
+    translations,
+    isServerOn,
+    tokens: { idToken },
+  } = user;
+  const localTranslation = await getTranslationFromChromeStorage(
+    translations,
+    originText,
+  );
+
+  if (localTranslation) {
+    return {
+      translation: localTranslation.translated,
+      notification: "로컬 스토리지",
+      glossary: localTranslation.glossary,
+    };
+  }
+
+  if (isServerOn) {
+    const serverTranslation = await getTranslationFromServer({
+      clientId,
+      idToken,
+      originText,
+    });
+
+    if (serverTranslation.result !== "ok") {
+      throw serverTranslation.error.message;
+    } else if (serverTranslation.result === "ok" && serverTranslation.data) {
+      return {
+        translation: serverTranslation.data.translated,
+        notification: "서버",
+        glossary: serverTranslation.data.glossary,
+      };
+    }
+  }
+
+  return googleTranslate(user, originText);
 };

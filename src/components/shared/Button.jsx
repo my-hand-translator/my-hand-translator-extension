@@ -21,7 +21,7 @@ const Button = styled("button", {
         width: "5em",
         height: "2em",
       },
-      midium: {
+      medium: {
         width: "7em",
         height: "3em",
       },

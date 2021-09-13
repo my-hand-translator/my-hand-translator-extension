@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
 
-import { nanoid } from "nanoid";
-
 import ContainerStyled from "./shared/Container";
 import ErrorStyled from "./shared/Error";
 import Button from "./shared/Button";
@@ -19,10 +17,8 @@ import {
 } from "../services/userService";
 import {
   getGlossaryFromGoogleCloudAPI,
-  getTranslationFromChromeStorage,
-  getTranslationFromGoogleCloudAPI,
-  getTranslationFromServer,
-  sendTranslationResult,
+  getTranslationResult,
+  googleTranslate,
 } from "../services/translationService";
 
 import { SIGNING_STATUS } from "../constants/user";
@@ -44,10 +40,10 @@ export default function Popup() {
         const userData = await chromeStore.get("userData");
 
         if (userData) {
+          const glossary = await getGlossaryFromGoogleCloudAPI(userData);
+
           setUser(userData);
           setIsServerOn(userData.isServerOn);
-
-          const glossary = await getGlossaryFromGoogleCloudAPI(userData);
 
           await chromeStore.set("userData", { ...userData, glossary });
 
@@ -76,9 +72,7 @@ export default function Popup() {
     setUser(newUser);
   };
 
-  const synchronizeUserAndServer = async () => {
-    const userData = await chromeStore.get("userData");
-
+  const synchronizeUserAndServer = async (userData) => {
     if (!userData) {
       return setError("유저 데이터가 없습니다.");
     }
@@ -129,7 +123,11 @@ export default function Popup() {
         throw loginResult;
       }
 
-      const newUserData = { ...user, glossaryId: loginResult.glossaryId };
+      const newUserData = {
+        ...user,
+        glossaryId: loginResult.glossaryId,
+        isServerOn: true,
+      };
 
       await chromeStore.set("userData", newUserData);
       await chromeStore.set("glossaryId", loginResult.glossaryId);
@@ -139,12 +137,13 @@ export default function Popup() {
       await updateUserSigningStatus(loginResult.isUser);
 
       if (loginResult.isUser) {
-        await synchronizeUserAndServer();
+        await synchronizeUserAndServer(newUserData);
       }
 
       return setIsServerOn(true);
     } catch (err) {
       setError(err.message);
+
       return setIsServerOn(false);
     }
   };
@@ -158,97 +157,25 @@ export default function Popup() {
     setOriginText(value);
   };
 
-  const googleTranslate = async () => {
-    try {
-      const translated = await getTranslationFromGoogleCloudAPI(
-        user,
-        originText,
-      );
-      const currentUrl = await chromeStore.get("currentUrl");
-
-      if (translated.error) {
-        return setError("구글 API 번역 요청 중 에러가 발생했습니다.");
-      }
-
-      const { translatedText } = translated.glossaryTranslations[0];
-
-      const currentTranslationResult = {
-        text: originText,
-        translated: translatedText,
-        url: currentUrl,
-        glossary: user.glossary,
-        createdAt: new Date().toISOString(),
-        nanoId: nanoid(),
-      };
-
-      if (isServerOn) {
-        const sendingTranslationResponse = await sendTranslationResult(
-          user,
-          currentTranslationResult,
-        );
-
-        if (sendingTranslationResponse.result !== "ok") {
-          setError("서버에 번역 결과를 저장하는데 실패했습니다.");
-        }
-      }
-
-      const newUserData = {
-        ...user,
-        translations: user.translations.concat(currentTranslationResult),
-      };
-
-      await chromeStore.set("userData", newUserData);
-
-      return setTranslationResult({
-        translation: translatedText,
-        notification: "구글 API",
-        glossary: user.glossary,
-      });
-    } catch (err) {
-      return setError(err.message);
-    }
-  };
-
   const handleClickTranslation = async () => {
     setError("");
 
     try {
-      const localTranslation = await getTranslationFromChromeStorage(
-        user.translations,
-        originText,
-      );
+      const result = await getTranslationResult(user, originText);
 
-      if (localTranslation) {
-        return setTranslationResult({
-          translation: localTranslation.translated,
-          notification: "로컬 스토리지",
-          glossary: localTranslation.glossary,
-        });
-      }
-
-      if (isServerOn) {
-        const serverTranslation = await getTranslationFromServer(
-          user,
-          originText,
-        );
-
-        if (serverTranslation.result !== "ok") {
-          setError(serverTranslation.error.message);
-        } else if (
-          serverTranslation.result === "ok" &&
-          serverTranslation.data
-        ) {
-          return setTranslationResult({
-            translation: serverTranslation.data.translated,
-            notification: "서버",
-            glossary: serverTranslation.data.glossary,
-          });
-        }
-      }
-
-      return await googleTranslate();
+      setTranslationResult(result);
     } catch (err) {
-      return setError(err.message || err.error.message);
+      setError(err);
+    }
+  };
+
+  const handleClickGoogleTranslate = async () => {
+    try {
+      const result = await googleTranslate(user, originText);
+
+      setTranslationResult(result);
+    } catch (err) {
+      setError(err);
     }
   };
 
@@ -284,8 +211,8 @@ export default function Popup() {
               <Translation
                 originText={originText}
                 translationResult={translationResult}
-                handleClickGoogleTranslate={googleTranslate}
                 handleChangeTextarea={handleChangeTextarea}
+                handleClickGoogleTranslate={handleClickGoogleTranslate}
               />
 
               <ContainerStyled flex="row" justify="spaceBetween">
@@ -294,7 +221,7 @@ export default function Popup() {
                   bgColor="lightBlue"
                   onClick={handleClickOptionButton}
                 >
-                  내 용어집 {user.glossary ? "편집" : "생성"} 하기
+                  내 용어집 {user?.glossary ? "편집" : "생성"} 하기
                 </Button>
 
                 <Button
@@ -305,17 +232,16 @@ export default function Popup() {
                   내 번역 기록 보기
                 </Button>
               </ContainerStyled>
+              {isServerOn && (
+                <Button
+                  name="other-glossaries"
+                  bgColor="lightBlue"
+                  onClick={handleClickOptionButton}
+                >
+                  다른 사람 용어집 구경하기
+                </Button>
+              )}
             </>
-          )}
-
-          {isServerOn && (
-            <Button
-              name="other-glossaries"
-              bgColor="lightBlue"
-              onClick={handleClickOptionButton}
-            >
-              다른 사람 용어집 구경하기
-            </Button>
           )}
         </ContainerStyled>
       ) : (

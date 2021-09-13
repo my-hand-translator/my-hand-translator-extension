@@ -52,10 +52,10 @@ export const getCsvFromGoogleStorage = async (
 
     hasBucket = true;
 
-    const bucketGlossayData = await response.text();
-    const glossayData = convertCsvToJson(bucketGlossayData);
+    const bucketGlossaryData = await response.text();
+    const glossaryData = convertCsvToJson(bucketGlossaryData);
 
-    return { hasBucket, glossayData };
+    return { hasBucket, glossaryData };
   } catch (error) {
     return errorHandler(error.message);
   }
