@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { BsArrowRight } from "react-icons/bs";
+import { useSelector } from "react-redux";
 
 import GlossaryList from "./GlossaryList";
 import Button from "./shared/Button";
@@ -36,7 +37,6 @@ const initWordsToAdd = {
 function EditGlossary() {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMassage, setErrorMassage] = useState(null);
-  const [user, setUser] = useState(null);
   const [glossary, setGlossary] = useState({});
   const [hasBucket, setHasBucket] = useState(null);
   const [bucketId, setBucketId] = useState(null);
@@ -45,56 +45,53 @@ function EditGlossary() {
   const focus = useRef(null);
   const history = useHistory();
 
+  const user = useSelector((state) => state.user);
+
   useEffect(() => {
     (async () => {
       try {
-        const userData = await chromeStore.get("userData");
-
-        setBucketId(userData.email.replace(/@|\./gi, ""));
-        setUser(userData);
+        setBucketId(user.email.replace(/@|\./gi, ""));
       } catch (error) {
         setIsLoading(false);
         setErrorMassage(error.message);
       }
     })();
-  }, []);
+  }, [user]);
 
   useEffect(() => {
-    if (user) {
-      const {
-        isServerOn,
-        email,
-        clientId,
-        clientSecret,
-        tokens: { accessToken, refreshToken },
-      } = user;
+    const {
+      isServerOn,
+      email,
+      clientId,
+      clientSecret,
+      tokens: { accessToken, refreshToken },
+    } = user;
 
-      (async () => {
-        const dataFromGoogle = await getCsvFromGoogleStorage(
-          {
-            bucketId,
-            clientId,
-            clientSecret,
-          },
-          { accessToken, refreshToken },
+    (async () => {
+      const dataFromGoogle = await getCsvFromGoogleStorage(
+        {
+          bucketId,
+          clientId,
+          clientSecret,
+        },
+        { accessToken, refreshToken },
+        setErrorMassage,
+      );
+
+      setHasBucket(dataFromGoogle.hasBucket);
+
+      if (isServerOn && dataFromGoogle.hasBucket) {
+        const dataFromServer = await getGlossaryFromServer(
+          { userId: email, accessToken },
           setErrorMassage,
         );
 
-        setHasBucket(dataFromGoogle.hasBucket);
+        Object.assign(dataFromGoogle.glossaryData, dataFromServer);
+      }
 
-        if (isServerOn && dataFromGoogle.hasBucket) {
-          const dataFromServer = await getGlossaryFromServer(
-            { userId: email, accessToken },
-            setErrorMassage,
-          );
-
-          Object.assign(dataFromGoogle.glossaryData, dataFromServer);
-        }
-
-        setGlossary(dataFromGoogle.glossaryData);
-        setIsLoading(false);
-      })();
-    }
+      setGlossary(dataFromGoogle.glossaryData);
+      setIsLoading(false);
+    })();
   }, [user]);
 
   const handleWordsChange = (event) => {

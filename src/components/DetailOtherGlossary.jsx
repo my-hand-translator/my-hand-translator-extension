@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { styled } from "@stitches/react";
 
 import GlossaryList from "./GlossaryList";
@@ -29,7 +30,8 @@ function DetailOtherGlossary() {
   const [myGlossary, setMyGlossary] = useState(null);
   const [otherGlossary, setOtherGlossary] = useState(null);
   const [hasServiceAccess, setHasServiceAccess] = useState(null);
-  const [user, setUser] = useState(null);
+
+  const user = useSelector((state) => state.user);
 
   const { userId: otherEmail } = useParams();
   const userId = otherEmail.split("@")[0];
@@ -37,14 +39,12 @@ function DetailOtherGlossary() {
   useEffect(() => {
     (async () => {
       try {
-        const userData = await chromeStore.get("userData");
         const {
           email: myEmail,
           isServerOn,
           tokens: { accessToken },
-        } = userData;
+        } = user;
 
-        setUser(userData);
         setHasServiceAccess(isServerOn);
 
         if (isServerOn) {

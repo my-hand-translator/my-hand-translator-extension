@@ -27,6 +27,13 @@
       {
         "singleQuote": false
       }
+    ],
+    "no-param-reassign": [
+      "error",
+      {
+        "props": true,
+        "ignorePropertyModificationsFor": ["state"]
+      }
     ]
   },
   "globals": {

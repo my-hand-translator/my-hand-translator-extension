@@ -55,7 +55,7 @@ function MyTranslation({ translation, onClick }) {
 
       <Container justify="center" align="itemCenter">
         <Button
-          tyae="button"
+          type="button"
           size="small"
           bgColor="red"
           onClick={() => onClick(translation)}

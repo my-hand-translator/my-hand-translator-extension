@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useSelector } from "react-redux";
 
 import Title from "./shared/Title";
 import Container from "./shared/Container";
@@ -9,7 +10,7 @@ import OtherGlossary from "./OtherGlossary";
 
 import { getGlossaries } from "../services/glossaryService";
 import { styled } from "../config/stitches.config";
-import chromeStore from "../utils/chromeStore";
+
 import debounce from "../utils/utils";
 
 const FormContent = styled("form", {
@@ -23,36 +24,29 @@ const DEBOUNCE_DELAY = 500;
 
 export default function OtherGlossaries() {
   const [error, setError] = useState("");
-  const [user, setUser] = useState({});
   const [isSearched, setIsSearched] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [glossaries, setGlossaries] = useState([]);
 
+  const idToken = useSelector((state) => state.user.tokens.idToken);
   const observedElement = useRef();
 
   useEffect(() => {
     (async () => {
       try {
-        const storageUser = await chromeStore.get("userData");
+        const serverGlossaries = await getGlossaries(
+          idToken,
+          currentPage,
+          DEFAULT_LIMIT,
+        );
 
-        try {
-          const serverGlossaries = await getGlossaries(
-            storageUser,
-            currentPage,
-            DEFAULT_LIMIT,
-          );
-
-          setGlossaries([...glossaries, ...serverGlossaries]);
-          setUser(storageUser);
-        } catch (err) {
-          setError(err.message);
-        }
+        setGlossaries([...glossaries, ...serverGlossaries]);
       } catch (err) {
         setError(err.message);
       }
     })();
-  }, [currentPage]);
+  }, [currentPage, idToken]);
 
   useEffect(() => {
     const handleObserver = (entries) => {
@@ -89,7 +83,7 @@ export default function OtherGlossaries() {
     }
 
     const serverGlossaries = await getGlossaries(
-      user,
+      idToken,
       currentPage,
       DEFAULT_LIMIT,
       searchValue,
