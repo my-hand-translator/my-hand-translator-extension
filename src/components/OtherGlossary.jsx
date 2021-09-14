@@ -23,7 +23,7 @@ const LinkStyled = styled(Link, {
   color: "$black",
   textDecoration: "none",
   outline: "none",
-  marginBottom: "1.5em",
+  margin: "1.5em 0",
 });
 
 export default function OtherGlossary({ glossary }) {

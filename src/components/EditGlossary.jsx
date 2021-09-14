@@ -22,6 +22,7 @@ import {
   updateGlossaryFromServer,
 } from "../services/glossaryService";
 import { styled } from "../config/stitches.config";
+import { OTHER_GLOSSARIES } from "../constants/url";
 
 const Input = styled("input", {
   width: "80%",
@@ -200,7 +201,7 @@ function EditGlossary() {
     }
 
     setIsLoading(false);
-    history.push("/");
+    history.push(OTHER_GLOSSARIES);
   };
 
   if (isLoading) {

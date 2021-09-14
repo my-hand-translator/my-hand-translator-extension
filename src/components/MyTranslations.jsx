@@ -4,36 +4,22 @@ import Title from "./shared/Title";
 import ErrorStyled from "./shared/Error";
 import Button from "./shared/Button";
 import Container from "./shared/Container";
-
+import TabContainer from "./shared/TabContainer";
 import MyTranslation from "./MyTranslation";
 
 import { styled } from "../config/stitches.config";
+import chromeStore from "../utils/chromeStore";
 import debounce from "../utils/utils";
 import {
   createTranslationParam,
   getTranslations,
   combineTranslations,
 } from "../services/translationService";
-import chromeStore from "../utils/chromeStore";
-
-const HeaderContainer = styled(Container, {
-  marginBottom: "2em",
-});
-
-const TranslationsContainer = styled(Container, {
-  width: "100%",
-});
 
 const FormContent = styled("form", {
-  marginBottom: "1em",
-
   "& input": {
     marginRight: "0.5em",
   },
-});
-
-const FormContainer = styled(Container, {
-  width: "90%",
 });
 
 const SPLIT_UNIT = 5;
@@ -132,14 +118,14 @@ function MyTranslations() {
 
   return (
     <>
-      <HeaderContainer justify="center" align="center">
+      <Container justify="center" align="itemCenter">
         <Title>내 번역 기록 보기</Title>
-      </HeaderContainer>
+      </Container>
 
-      {error && <ErrorStyled>{error}</ErrorStyled>}
+      <TabContainer>
+        <Container justify="spaceBetween" align="itemCenter">
+          <ErrorStyled>{error}</ErrorStyled>
 
-      <TranslationsContainer justify="center" align="center" flex="column">
-        <FormContainer justify="end">
           <FormContent>
             <input
               type="text"
@@ -156,23 +142,25 @@ function MyTranslations() {
               검색
             </Button>
           </FormContent>
-        </FormContainer>
+        </Container>
 
-        {translations.length &&
-          translations.map((translation, index) => {
-            if (index < splitIndex) {
-              return (
-                <MyTranslation
-                  key={translation.nanoId}
-                  translation={translation}
-                  onClick={handleDeleteButton}
-                />
-              );
-            }
+        <div className="translation-list">
+          {translations.length !== 0 &&
+            translations.map((translation, index) => {
+              if (index < splitIndex) {
+                return (
+                  <MyTranslation
+                    key={translation.nanoId}
+                    translation={translation}
+                    onClick={handleDeleteButton}
+                  />
+                );
+              }
 
-            return null;
-          })}
-      </TranslationsContainer>
+              return null;
+            })}
+        </div>
+      </TabContainer>
 
       {!isSearched && <div ref={observedElement} />}
     </>

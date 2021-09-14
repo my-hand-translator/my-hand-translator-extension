@@ -3,15 +3,14 @@ import React, { useEffect, useRef, useState } from "react";
 import Title from "./shared/Title";
 import Container from "./shared/Container";
 import ErrorStyled from "./shared/Error";
-import OtherGlossary from "./OtherGlossary";
-
+import TabContainer from "./shared/TabContainer";
 import Button from "./shared/Button";
+import OtherGlossary from "./OtherGlossary";
 
 import { getGlossaries } from "../services/glossaryService";
 import { styled } from "../config/stitches.config";
 import chromeStore from "../utils/chromeStore";
 import debounce from "../utils/utils";
-import TabContainer from "./shared/TabContainer";
 
 const FormContent = styled("form", {
   "& input": {
@@ -103,7 +102,7 @@ export default function OtherGlossaries() {
   return (
     <>
       <Container justify="center" align="itemCenter">
-        <Title>내 번역 기록 보기</Title>
+        <Title>다른 사람 용어집 목록</Title>
       </Container>
 
       <TabContainer>
