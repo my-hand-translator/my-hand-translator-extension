@@ -56,15 +56,19 @@ function EditGlossary() {
       const {
         isServerOn,
         email,
-        tokens: { accessToken },
+        clientId,
+        clientSecret,
+        tokens: { accessToken, refreshToken },
       } = user;
 
       (async () => {
         const dataFromGoogle = await getCsvFromGoogleStorage(
           {
-            accessToken,
             bucketId,
+            clientId,
+            clientSecret,
           },
+          { accessToken, refreshToken },
           setErrorMassage,
         );
 
@@ -137,7 +141,9 @@ function EditGlossary() {
     const {
       isServerOn,
       projectId,
-      tokens: { accessToken },
+      clientId,
+      clientSecret,
+      tokens: { accessToken, refreshToken },
     } = user;
 
     if (!hasBucket) {
@@ -147,7 +153,13 @@ function EditGlossary() {
     const glossaryToCsv = convertObjectToCsv(glossary);
 
     await updateCsvFromGoogleStorage(
-      { csv: glossaryToCsv, bucketId, accessToken },
+      {
+        csv: glossaryToCsv,
+        bucketId,
+        clientId,
+        clientSecret,
+      },
+      { accessToken, refreshToken },
       setErrorMassage,
     );
 

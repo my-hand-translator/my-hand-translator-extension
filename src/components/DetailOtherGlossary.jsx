@@ -99,13 +99,22 @@ function DetailOtherGlossary() {
     const {
       projectId,
       bucketId,
-      tokens: { accessToken },
+      clientId,
+      clientSecret,
+      tokens: { accessToken, refreshToken },
     } = user;
+
     const glossaryId = await chromeStore.get("glossaryId");
     const myGlossayToCsv = convertObjectToCsv(myGlossary);
 
     await updateCsvFromGoogleStorage(
-      { csv: myGlossayToCsv, bucketId, accessToken },
+      {
+        csv: myGlossayToCsv,
+        bucketId,
+        clientId,
+        clientSecret,
+      },
+      { accessToken, refreshToken },
       errorMassage,
     );
 
