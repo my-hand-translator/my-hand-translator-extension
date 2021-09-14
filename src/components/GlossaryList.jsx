@@ -6,7 +6,7 @@ import ContainerStyled from "./shared/Container";
 import Button from "./shared/Button";
 import Col from "./shared/Col";
 
-function GlossaryList({ glossaries, buttonText, onButtonClick }) {
+function GlossaryList({ glossaries, buttonColor, buttonText, onButtonClick }) {
   return (
     <>
       {Object.keys(glossaries).map((text) => {
@@ -25,7 +25,7 @@ function GlossaryList({ glossaries, buttonText, onButtonClick }) {
             <Col grid="col1">
               <Button
                 size="small"
-                bgColor="red"
+                bgColor={buttonColor === "primary" ? "lightBlue" : "red"}
                 onClick={() => onButtonClick(text, glossaries[text])}
               >
                 {buttonText}
@@ -38,10 +38,15 @@ function GlossaryList({ glossaries, buttonText, onButtonClick }) {
   );
 }
 
+GlossaryList.defaultProps = {
+  buttonColor: "primary",
+};
+
 GlossaryList.propTypes = {
   glossaries: PropTypes.objectOf(PropTypes.string).isRequired,
   buttonText: PropTypes.string.isRequired,
   onButtonClick: PropTypes.func.isRequired,
+  buttonColor: PropTypes.string,
 };
 
 export default GlossaryList;

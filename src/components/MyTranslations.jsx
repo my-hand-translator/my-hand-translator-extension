@@ -135,7 +135,9 @@ function MyTranslations() {
       <HeaderContainer justify="center" align="center">
         <Title>내 번역 기록 보기</Title>
       </HeaderContainer>
+
       {error && <ErrorStyled>{error}</ErrorStyled>}
+
       <TranslationsContainer justify="center" align="center" flex="column">
         <FormContainer justify="end">
           <FormContent>
@@ -155,7 +157,8 @@ function MyTranslations() {
             </Button>
           </FormContent>
         </FormContainer>
-        {translations.length !== 0 &&
+
+        {translations.length &&
           translations.map((translation, index) => {
             if (index < splitIndex) {
               return (
@@ -170,6 +173,7 @@ function MyTranslations() {
             return null;
           })}
       </TranslationsContainer>
+
       {!isSearched && <div ref={observedElement} />}
     </>
   );

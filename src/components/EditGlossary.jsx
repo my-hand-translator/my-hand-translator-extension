@@ -254,6 +254,7 @@ function EditGlossary() {
         <GlossaryList
           glossaries={glossary}
           buttonText="삭제"
+          buttonColor="warning"
           onButtonClick={handleDeleteGlossary}
         />
       )}
