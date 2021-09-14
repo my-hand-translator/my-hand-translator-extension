@@ -23,8 +23,14 @@ import {
 
 import { SIGNING_STATUS } from "../constants/user";
 import chromeStore from "../utils/chromeStore";
+import { styled } from "../config/stitches.config";
 
 const TAB_BASE_URL = `chrome-extension://${chrome.runtime.id}/options.html#/`;
+
+const PopupContainer = styled(ContainerStyled, {
+  width: "400px",
+  height: "fit-content",
+});
 
 export default function Popup() {
   const [isOAuthSuccess, setIsOAuthSuccess] = useState(false);
@@ -184,7 +190,7 @@ export default function Popup() {
   };
 
   return (
-    <ContainerStyled flex="column">
+    <PopupContainer flex="column">
       <Title align="center">내 손 번역</Title>
 
       {error && <ErrorStyled>{error}</ErrorStyled>}
@@ -247,6 +253,6 @@ export default function Popup() {
       ) : (
         <Login handleOAuthResult={setIsOAuthSuccess} />
       )}
-    </ContainerStyled>
+    </PopupContainer>
   );
 }

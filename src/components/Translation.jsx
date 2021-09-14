@@ -7,10 +7,12 @@ import SubTitle from "./shared/SubTitle";
 import ContainerStyled from "./shared/Container";
 import Button from "./shared/Button";
 
+const TranslationContainer = styled(ContainerStyled, {});
+
 const TextBox = styled("p", {
   color: "$black",
   padding: "10px",
-  fontSize: "20px",
+  fontSize: "15px",
   borderRadius: "10px",
 
   variants: {
@@ -35,20 +37,20 @@ const TextBox = styled("p", {
 });
 
 const Textarea = styled("textarea", {
+  minHeight: "150px",
+  minWidth: "300px",
+  maxWidth: "500px",
   padding: "10px",
   overflow: "auto",
   fontSize: "20px",
-  borderRadius: "10px",
   wordWrap: "break-word",
+  borderRadius: "10px",
   border: "1px solid $black",
 
   variants: {
-    boxType: {
-      translation: { width: "400px", height: "200px" },
-    },
     fontSize: {
-      big: { fontSize: "30px" },
-      small: { fontSize: "10px" },
+      big: { fontSize: "20px" },
+      small: { fontSize: "15px" },
     },
   },
 });
@@ -64,16 +66,16 @@ export default function Translation({
   const glossaryEntries = Object.entries(glossary || {});
 
   return (
-    <ContainerStyled flex="column" border="black">
+    <TranslationContainer flex="column" border="black">
       <ContainerStyled flex="column">
         <SubTitle>번역할 문장</SubTitle>
 
         <Textarea
-          boxType="translation"
           type="text"
           placeholder="번역할 문장을 입력해주세요."
           onChange={handleChangeTextarea}
           readOnly={isOnWebPage}
+          fontSize={isOnWebPage ? "small" : "big"}
         >
           {originText}
         </Textarea>
@@ -103,7 +105,7 @@ export default function Translation({
           ))}
         </ul>
       </ContainerStyled>
-    </ContainerStyled>
+    </TranslationContainer>
   );
 }
 
