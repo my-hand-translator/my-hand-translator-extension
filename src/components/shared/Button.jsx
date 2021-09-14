@@ -36,6 +36,7 @@ const Button = styled("button", {
       lightBlue: { backgroundColor: "$lightBlue" },
       apricot: { backgroundColor: "$apricot" },
       white: { backgroundColor: "$white" },
+      red: { backgroundColor: "$red" },
     },
 
     fontColor: {

@@ -1,8 +1,10 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { BsArrowRight } from "react-icons/bs";
 
 import ContainerStyled from "./shared/Container";
 import Button from "./shared/Button";
+import Col from "./shared/Col";
 
 function GlossaryList({ glossaries, buttonText, onButtonClick }) {
   return (
@@ -10,15 +12,25 @@ function GlossaryList({ glossaries, buttonText, onButtonClick }) {
       {Object.keys(glossaries).map((text) => {
         return (
           <ContainerStyled id={text} justify="spaceEvenly" align="itemCenter">
-            <div name="text">{text} </div>
-            <p>{"->"}</p>
-            <div name="translation">{glossaries[text]} </div>
-            <Button
-              size="small"
-              onClick={() => onButtonClick(text, glossaries[text])}
-            >
-              {buttonText}
-            </Button>
+            <Col name="text" grid="col2">
+              {text}
+            </Col>
+            <p>
+              <BsArrowRight />
+            </p>
+            <Col name="translation" grid="col2">
+              {glossaries[text]}
+            </Col>
+
+            <Col grid="col1">
+              <Button
+                size="small"
+                bgColor="red"
+                onClick={() => onButtonClick(text, glossaries[text])}
+              >
+                {buttonText}
+              </Button>
+            </Col>
           </ContainerStyled>
         );
       })}

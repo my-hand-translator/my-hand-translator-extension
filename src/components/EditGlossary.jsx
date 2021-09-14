@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useHistory } from "react-router-dom";
+import { BsArrowRight } from "react-icons/bs";
 
 import GlossaryList from "./GlossaryList";
 import Button from "./shared/Button";
@@ -8,6 +9,7 @@ import SubTitle from "./shared/SubTitle";
 import ErrorStyled from "./shared/Error";
 import ContainerStyled from "./shared/Container";
 import TabContainer from "./shared/TabContainer";
+import Col from "./shared/Col";
 
 import chromeStore from "../utils/chromeStore";
 import { convertObjectToCsv } from "../utils/convert";
@@ -19,6 +21,11 @@ import {
   updateCsvFromGoogleStorage,
   updateGlossaryFromServer,
 } from "../services/glossaryService";
+import { styled } from "../config/stitches.config";
+
+const Input = styled("input", {
+  width: "80%",
+});
 
 const initWordsToAdd = {
   text: "",
@@ -204,7 +211,7 @@ function EditGlossary() {
     <TabContainer>
       <ContainerStyled justify="spaceBetween">
         <Title>{user.glossary ? "용어집 편집" : "용어집 생성"}</Title>
-        <Button size="medium" onClick={handleEditGlossary}>
+        <Button size="medium" bgColor="blue" onClick={handleEditGlossary}>
           제출
         </Button>
       </ContainerStyled>
@@ -215,23 +222,31 @@ function EditGlossary() {
 
       <form onSubmit={handleAddGlossary}>
         <ContainerStyled justify="spaceEvenly" align="itemCenter">
-          <input
-            ref={focus}
-            type="text"
-            name="text"
-            value={wordsToAdd.text}
-            onChange={handleWordsChange}
-          />
-          <p>{"->"}</p>
-          <input
-            type="text"
-            name="translation"
-            value={wordsToAdd.translation}
-            onChange={handleWordsChange}
-          />
-          <Button type="submit" size="small">
-            추가
-          </Button>
+          <Col grid="col2">
+            <Input
+              ref={focus}
+              type="text"
+              name="text"
+              value={wordsToAdd.text}
+              onChange={handleWordsChange}
+            />
+          </Col>
+          <p>
+            <BsArrowRight />
+          </p>
+          <Col grid="col2">
+            <Input
+              type="text"
+              name="translation"
+              value={wordsToAdd.translation}
+              onChange={handleWordsChange}
+            />
+          </Col>
+          <Col grid="col1">
+            <Button type="submit" size="small" bgColor="lightBlue">
+              추가
+            </Button>
+          </Col>
         </ContainerStyled>
       </form>
 

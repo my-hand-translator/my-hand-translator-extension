@@ -8,7 +8,7 @@ import { styled } from "../config/stitches.config";
 import { OTHER_GLOSSARIES } from "../constants/url";
 
 const GlossaryContainer = styled(Container, {
-  width: "650px",
+  maxWidth: "650px",
   padding: "2em",
 
   boxShadow: "0 2px 10px rgba(0, 0, 0, 0.3)",

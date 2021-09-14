@@ -11,6 +11,7 @@ import { getGlossaries } from "../services/glossaryService";
 import { styled } from "../config/stitches.config";
 import chromeStore from "../utils/chromeStore";
 import debounce from "../utils/utils";
+import TabContainer from "./shared/TabContainer";
 
 const HeaderContainer = styled(Container, {
   marginBottom: "1em",
@@ -115,31 +116,34 @@ export default function OtherGlossaries() {
         <Title>내 번역 기록 보기</Title>
         {error && <ErrorStyled>{error}</ErrorStyled>}
       </HeaderContainer>
-      <GlossaryContainer justify="center" align="center" flex="column">
-        <FormContainer justify="end">
-          <FormContent>
-            <input
-              type="text"
-              placeholder="검색어를 입력하세요."
-              onChange={({ target }) => {
-                handleSearchValue(target.value);
-              }}
-            />
-            <Button
-              size="small"
-              type="button"
-              onClick={handleSearchButtonClick}
-            >
-              검색
-            </Button>
-          </FormContent>
-        </FormContainer>
-        {glossaries.length !== 0 &&
-          glossaries.map((glossary) => {
-            return <OtherGlossary glossary={glossary}>test</OtherGlossary>;
-          })}
-      </GlossaryContainer>
-      {!isSearched && <div ref={observedElement} />}
+
+      <TabContainer>
+        <GlossaryContainer justify="center" align="center" flex="column">
+          <FormContainer justify="end">
+            <FormContent>
+              <input
+                type="text"
+                placeholder="검색어를 입력하세요."
+                onChange={({ target }) => {
+                  handleSearchValue(target.value);
+                }}
+              />
+              <Button
+                size="small"
+                type="button"
+                onClick={handleSearchButtonClick}
+              >
+                검색
+              </Button>
+            </FormContent>
+          </FormContainer>
+          {glossaries.length !== 0 &&
+            glossaries.map((glossary) => {
+              return <OtherGlossary glossary={glossary}>test</OtherGlossary>;
+            })}
+        </GlossaryContainer>
+        {!isSearched && <div ref={observedElement} />}
+      </TabContainer>
     </>
   );
 }
