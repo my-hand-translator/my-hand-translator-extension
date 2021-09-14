@@ -8,19 +8,22 @@ import { styled } from "../config/stitches.config";
 import { OTHER_GLOSSARIES } from "../constants/url";
 
 const GlossaryContainer = styled(Container, {
-  maxWidth: "650px",
+  width: "100%",
   padding: "2em",
-
   boxShadow: "0 2px 10px rgba(0, 0, 0, 0.3)",
   textAlign: "center",
 
-  marginBottom: "1.5em",
+  "@tabMedium": {
+    flexDirection: "column",
+  },
 });
 
 const LinkStyled = styled(Link, {
+  display: "flex",
   color: "$black",
   textDecoration: "none",
   outline: "none",
+  marginBottom: "1.5em",
 });
 
 export default function OtherGlossary({ glossary }) {
@@ -30,21 +33,24 @@ export default function OtherGlossary({ glossary }) {
 
   return (
     <LinkStyled to={`${OTHER_GLOSSARIES}/${glossary.userEmail}`}>
-      <GlossaryContainer justify="center" align="center">
-        <Container justify="center" align="center">
+      <GlossaryContainer justify="spaceAround">
+        <Container justify="center">
           <span>{glossary.userEmail}의 용어집</span>
         </Container>
-        <Container justify="center" align="center">
-          <span>Keywords : </span>
-          {keywords.length !== 0 &&
-            keywords.map((keyword, index) => {
-              return (
-                <span>
-                  {keyword}
-                  {index === keywords.length - 1 ? "" : ", "}
-                </span>
-              );
-            })}
+
+        <Container justify="center">
+          <span>
+            Keywords:{" "}
+            {keywords.length !== 0 &&
+              keywords.map((keyword, index) => {
+                return (
+                  <span>
+                    {keyword}
+                    {index === keywords.length - 1 ? "" : ", "}
+                  </span>
+                );
+              })}
+          </span>
         </Container>
       </GlossaryContainer>
     </LinkStyled>
