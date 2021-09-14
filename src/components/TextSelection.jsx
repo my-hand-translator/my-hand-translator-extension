@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { styled } from "../config/stitches.config";
+import { css, globalCss, styled } from "../config/stitches.config";
 import {
   getTranslationResult,
   googleTranslate,
@@ -14,6 +14,7 @@ const PageTranslationContainer = styled(ContainerStyled, {
   position: "absolute",
   backgroundColor: "transparent",
   zIndex: "9999",
+  maxWidth: "500px",
 });
 
 const initialBoxPosition = {
@@ -45,21 +46,23 @@ export default function TextSelection() {
 
     const handleMouseup = ({ pageX, pageY }) => {
       setIsSelectionEnd(true);
+      setTextSelected(document.getSelection().toString().trim());
 
-      if (!isBoxVisible) {
+      if (!isButtonClicked) {
         setBoxPosition({ left: pageX, top: pageY });
       }
-
-      setTextSelected(document.getSelection().toString().trim());
     };
 
     const handleMousedown = () => {
       setIsSelectionEnd(false);
+      setIsButtonClicked(false);
     };
 
     const handleClickOutside = ({ target }) => {
-      if (boxRef.current && !boxRef.current.contains(target)) {
+      if (isBoxVisible && !boxRef.current?.contains(target)) {
         setIsBoxVisible(false);
+        setIsButtonClicked(false);
+        setTextSelected("");
       }
     };
 
@@ -74,10 +77,21 @@ export default function TextSelection() {
     };
   }, [isBoxVisible, boxRef]);
 
-  const handleClickTranslate = async () => {
+  const handleClickTranslate = async ({
+    pageX,
+    pageY,
+    clientX,
+    clientY,
+    view: { innerHeight, innerWidth },
+  }) => {
     setErrorMessage("");
     setIsBoxVisible(true);
     setIsButtonClicked(true);
+
+    const left = clientX / innerWidth < 0.5 ? pageX : pageX - 400;
+    const top = clientY / innerHeight < 0.5 ? pageY : pageY - 800;
+
+    setBoxPosition({ left, top });
 
     try {
       const result = await getTranslationResult(user, textSelected);
@@ -98,25 +112,33 @@ export default function TextSelection() {
     }
   };
 
+  globalCss(css);
+
   return (
     user && (
-      <PageTranslationContainer ref={boxRef} css={boxPosition}>
+      <PageTranslationContainer ref={boxRef} css={boxPosition} flex="column">
         {isBoxVisible ? (
-          <ContainerStyled flex="column">
-            {errorMessage && <ErrorStyled>{errorMessage}</ErrorStyled>}
-            {isButtonClicked && (
-              <Translation
-                originText={textSelected}
-                translationResult={translationResult}
-                handleClickGoogleTranslate={handleClickGoogleTranslate}
-                isOnWebPage
-              />
+          <>
+            {errorMessage && (
+              <ErrorStyled>{JSON.stringify(errorMessage)}</ErrorStyled>
             )}
-          </ContainerStyled>
+            <Translation
+              originText={textSelected}
+              translationResult={translationResult}
+              handleClickGoogleTranslate={handleClickGoogleTranslate}
+              isOnWebPage
+            />
+          </>
         ) : (
           textSelected &&
           isSelectionEnd && (
-            <Button onMouseDown={handleClickTranslate}>번역하기</Button>
+            <Button
+              bgColor="lightBlue"
+              size="translationButton"
+              onMouseDown={handleClickTranslate}
+            >
+              🖐
+            </Button>
           )
         )}
       </PageTranslationContainer>

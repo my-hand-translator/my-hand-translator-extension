@@ -29,6 +29,11 @@ const Button = styled("button", {
         width: "10em",
         height: "4em",
       },
+      translationButton: {
+        padding: "5px",
+        borderRadius: "5px",
+        fontSize: "20px",
+      },
     },
 
     bgColor: {

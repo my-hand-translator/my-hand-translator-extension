@@ -19,7 +19,7 @@ const ContainerStyled = styled("div", {
     size: {
       big: {
         width: "400px",
-        height: "fit-content",
+        height: "max-content",
       },
       medium: {
         width: "300px",
@@ -41,11 +41,11 @@ const ContainerStyled = styled("div", {
     },
 
     align: {
-      start: { alignSelf: "flex-start" },
-      end: { alignSelf: "flex-end" },
-      center: { alignSelf: "center" },
-      spaceBetween: { alignSelf: "space-between" },
-      spaceAround: { alignSelf: "space-around" },
+      start: { alignItems: "flex-start" },
+      end: { alignItems: "flex-end" },
+      center: { alignItems: "center" },
+      spaceBetween: { alignItems: "space-between" },
+      spaceAround: { alignItems: "space-around" },
       itemCenter: { alignItems: "center" },
     },
 
