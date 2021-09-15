@@ -38,16 +38,16 @@ scope and avoid unrelated commits.
 
 ## Testing your extension after building your project
 
-![screenshot-1](contributing-0.PNG)
+![screenshot-1](assets/contributing-0.PNG)
 
 - Go to `chrome://extensions/` (Please make sure you should use [Chrome Browser]!)
 - Turn on `Developer Mode(개발자 모드)`
 
-![screenshot-1](contributing-1.PNG)
+![screenshot-1](assets/contributing-1.PNG)
 
 - Click top left `Load unpacked` same as `압축해제된 확장 프로그램을 로드합니다.`
 
-![screenshot-2](contributing-2.PNG)
+![screenshot-2](assets/contributing-2.PNG)
 
 - Select `dist` directory of your my-hand-translator-frontend directory
 - And yes, you can show your chrome extension in `chrome://extensions/`!
