@@ -6,14 +6,14 @@ import { refreshAndGetNewTokens } from "./oAuthService";
 
 const GLOSSARY_NAME = "my-glossary";
 
-export const getGlossaries = async (user, page, limit, keyword = "") => {
+export const getGlossaries = async (idToken, page, limit, keyword = "") => {
   const response = await fetch(
     `${process.env.SERVER_URL}/glossaries/?keywords=${keyword}&page=${page}&limit=${limit}`,
     {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${user.tokens.idToken}`,
+        Authorization: `Bearer ${idToken}`,
       },
     },
   );

@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { HashRouter as Router, Switch, Route } from "react-router-dom";
+import { useDispatch } from "react-redux";
 
 import MyTranslations from "./MyTranslations";
 import EditGlossary from "./EditGlossary";
@@ -15,8 +16,32 @@ import {
   OTHER_GLOSSARY,
   POPUP,
 } from "../constants/url";
+import { updateUser } from "../features/user/userSlice";
+import chromeStore from "../utils/chromeStore";
 
 function Options() {
+  const dispatch = useDispatch();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    chrome.storage.onChanged.addListener(({ userData }) => {
+      dispatch(updateUser(userData.newValue));
+    });
+
+    (async () => {
+      const userData = await chromeStore.get("userData");
+
+      if (userData) {
+        dispatch(updateUser(userData));
+        setIsLoading(false);
+      }
+    })();
+  }, []);
+
+  if (isLoading) {
+    return <TabContainer>로딩 중...</TabContainer>;
+  }
+
   return (
     <Router>
       <Layout>

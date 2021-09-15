@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useSelector } from "react-redux";
 
 import Title from "./shared/Title";
 import ErrorStyled from "./shared/Error";
@@ -34,17 +35,24 @@ function MyTranslations() {
 
   const observedElement = useRef();
 
+  const isServerOn = useSelector((state) => state.user.isServerOn);
+  const storageTranslations = useSelector((state) => state.user.translations);
+  const idToken = useSelector((state) => state.user.tokens.idToken);
+  const email = useSelector((state) => state.user.email);
+
   useEffect(() => {
     (async () => {
       try {
-        const userData = await chromeStore.get("userData");
-
-        if (userData?.isServerOn) {
+        if (isServerOn) {
           const params = createTranslationParam(1, 100);
+          const serverTransitions = await getTranslations(
+            email,
+            idToken,
+            params,
+          );
 
-          const serverTransitions = await getTranslations(userData, params);
           const combinedTranslations = combineTranslations(
-            userData.translations,
+            storageTranslations,
             serverTransitions,
           );
 
@@ -54,13 +62,13 @@ function MyTranslations() {
           return;
         }
 
-        setTranslations(userData.translations);
+        setTranslations(storageTranslations);
         setSplitIndex(SPLIT_UNIT);
       } catch (err) {
         setError(err.message);
       }
     })();
-  }, []);
+  }, [isServerOn, email, idToken, storageTranslations]);
 
   useEffect(() => {
     const handleObserver = (entries) => {

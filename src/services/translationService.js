@@ -9,14 +9,14 @@ const DECIMAL_POINT = 2;
 const PERCENTAGE = 100;
 const SIMILARITY = 95;
 
-export const getTranslations = async (user, params) => {
+export const getTranslations = async (email, idToken, params) => {
   const response = await fetch(
-    `${process.env.SERVER_URL}/translations/${user.email}?${params}`,
+    `${process.env.SERVER_URL}/translations/${email}?${params}`,
     {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${user.tokens.idToken}`,
+        Authorization: `Bearer ${idToken}`,
       },
     },
   );
