@@ -22,12 +22,15 @@ const initialBoxPosition = {
   top: 0,
 };
 
+const [RESIZE_X, RESIZE_Y] = [400, 600];
+const SCREEN_HALF = 0.5;
+
 export default function TextSelection() {
   const [user, setUser] = useState(null);
 
-  const [boxPosition, setBoxPosition] = useState(initialBoxPosition);
-  const [isBoxVisible, setIsBoxVisible] = useState(false);
   const boxRef = useRef();
+  const [isBoxVisible, setIsBoxVisible] = useState(false);
+  const [boxPosition, setBoxPosition] = useState(initialBoxPosition);
 
   const [textSelected, setTextSelected] = useState("");
   const [translationResult, setTranslationResult] = useState({});
@@ -88,8 +91,8 @@ export default function TextSelection() {
     setIsBoxVisible(true);
     setIsButtonClicked(true);
 
-    const left = clientX / innerWidth < 0.5 ? pageX : pageX - 400;
-    const top = clientY / innerHeight < 0.5 ? pageY : pageY - 800;
+    const left = clientX / innerWidth < SCREEN_HALF ? pageX : pageX - RESIZE_X;
+    const top = clientY / innerHeight < SCREEN_HALF ? pageY : pageY - RESIZE_Y;
 
     setBoxPosition({ left, top });
 
