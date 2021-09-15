@@ -47,9 +47,12 @@ export const getCsvFromGoogleStorage = async (
     if (!response.ok) {
       const result = await response.text();
 
+      if (result === `No such object: ${bucketId}/my-glossary.csv`) {
+        return { hasBucket: true, glossaryData: {} };
+      }
+
       if (result === "The specified bucket does not exist.") {
-        hasBucket = false;
-        return { hasBucket };
+        return { hasBucket: false };
       }
 
       if (result === "Invalid Credentials") {
