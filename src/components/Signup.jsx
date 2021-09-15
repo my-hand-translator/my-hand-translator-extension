@@ -10,7 +10,7 @@ import { signup } from "../services/userService";
 import { DEFAULT_KEYWORDS } from "../constants/user";
 import chromeStore from "../utils/chromeStore";
 
-export default function Signup({ handleSignupResult }) {
+export default function Signup({ handleSignupResult, user }) {
   const [userKeywords, setUserKeywords] = useState(["default"]);
   const [extraKeywords, setExtraKeywords] = useState([]);
   const [extraKeyword, setExtraKeyword] = useState("");
@@ -20,14 +20,13 @@ export default function Signup({ handleSignupResult }) {
     event.preventDefault();
 
     try {
-      const userData = await chromeStore.get("userData");
-      const newUser = { ...userData, glossary: userData.glossary ?? {} };
+      const newUser = { ...user, glossary: user.glossary ?? {} };
       const totalKeywords = [...new Set([...userKeywords, ...extraKeywords])];
       const signupResult = await signup(newUser, totalKeywords);
 
       if (signupResult.result === "ok") {
         const userWithGlossaryId = {
-          ...userData,
+          ...user,
           glossaryId: signupResult.glossaryId,
         };
 
@@ -103,6 +102,27 @@ export default function Signup({ handleSignupResult }) {
   );
 }
 
+Signup.defaultProps = {
+  user: PropTypes.object,
+};
+
 Signup.propTypes = {
   handleSignupResult: PropTypes.func.isRequired,
+  user: PropTypes.shape({
+    clientId: PropTypes.string.isRequired,
+    clientSecret: PropTypes.string.isRequired,
+    email: PropTypes.string.isRequired,
+    glossary: PropTypes.objectOf(PropTypes.string),
+    glossaryId: PropTypes.string,
+    isServerOn: PropTypes.bool.isRequired,
+    name: PropTypes.string,
+    projectId: PropTypes.string.isRequired,
+    signed: PropTypes.string,
+    tokens: PropTypes.objectOf({
+      accessToken: PropTypes.string.isRequired,
+      idToken: PropTypes.string.isRequired,
+      refreshToken: PropTypes.string.isRequired,
+    }),
+    translations: PropTypes.arrayOf,
+  }),
 };
