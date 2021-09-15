@@ -8,7 +8,7 @@ Before submitting a pull request, please take a moment to review these guideline
 Found a problem? Want a new feature?
 
 - See if your issue or idea has [already been reported].
-- Provide a [reduced test case] or a [live example].
+- Provide a [reduced test case] or a live example.chrome://extensions/
 
 Remember, a bug is a _demonstrable problem_ caused by _our_ code.
 
@@ -31,7 +31,26 @@ scope and avoid unrelated commits.
 
    # Install the tools necessary for testing
    npm install
+
+   # Build source codes to make dist folder
+   npm run build
    ```
+
+## Testing your extension after building your project
+
+![screenshot-1](contributing-0.PNG)
+
+- Go to `chrome://extensions/` (Please make sure you should use [Chrome Browser]!)
+- Turn on `Developer Mode(개발자 모드)`
+
+![screenshot-1](contributing-1.PNG)
+
+- Click top left `Load unpacked` same as `압축해제된 확장 프로그램을 로드합니다.`
+
+![screenshot-2](contributing-2.PNG)
+
+- Select `dist` directory of your my-hand-translator-frontend directory
+- And yes, you can show your chrome extension in `chrome://extensions/`!
 
 2. Create a branch for your feature or fix:
 
@@ -71,6 +90,6 @@ That’s it! Now [open a pull request] with a clear title and description.
 
 [already been reported]: https://github.com/my-hand-translator/my-hand-translator-frontend/issues
 [fork this project]: https://github.com/my-hand-translator/my-hand-translator-frontend/fork
-[live example]: https://codesandbox.io/
 [open a pull request]: https://help.github.com/articles/using-pull-requests/
 [reduced test case]: https://css-tricks.com/reduced-test-cases/
+[Chrome Browser]: https://www.google.co.kr/chrome/?brand=FKPE&gclid=Cj0KCQjws4aKBhDPARIsAIWH0JU5IMp8RhX3d7FIwXeMVPDN3DDs4NdMtnoPquQxghYWULLNVo2CctMaArPfEALw_wcB&gclsrc=aw.ds
