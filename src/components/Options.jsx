@@ -4,17 +4,16 @@ import { useDispatch } from "react-redux";
 
 import MyTranslations from "./MyTranslations";
 import EditGlossary from "./EditGlossary";
-import Popup from "./Popup";
 import DetailOtherGlossary from "./DetailOtherGlossary";
 import Layout from "./shared/layouts";
 import OtherGlossaries from "./OtherGlossaries";
+import TabContainer from "./shared/TabContainer";
 
 import {
   MY_GLOSSARY,
   MY_TRANSLATIONS,
   OTHER_GLOSSARIES,
   OTHER_GLOSSARY,
-  POPUP,
 } from "../constants/url";
 import { updateUser } from "../features/user/userSlice";
 import chromeStore from "../utils/chromeStore";
@@ -46,9 +45,6 @@ function Options() {
     <Router>
       <Layout>
         <Switch>
-          <Route exact path={POPUP}>
-            <Popup />
-          </Route>
           <Route exact path={MY_GLOSSARY}>
             <EditGlossary />
           </Route>

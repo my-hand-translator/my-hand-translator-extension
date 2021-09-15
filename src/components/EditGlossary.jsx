@@ -35,38 +35,27 @@ const initWordsToAdd = {
 };
 
 function EditGlossary() {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [errorMassage, setErrorMassage] = useState(null);
   const [glossary, setGlossary] = useState({});
   const [hasBucket, setHasBucket] = useState(null);
-  const [bucketId, setBucketId] = useState(null);
   const [wordsToAdd, setWordsToAdd] = useState(initWordsToAdd);
 
   const focus = useRef(null);
   const history = useHistory();
 
   const user = useSelector((state) => state.user);
+  const {
+    isServerOn,
+    email,
+    bucketId,
+    clientId,
+    projectId,
+    clientSecret,
+    tokens: { accessToken, refreshToken },
+  } = user;
 
   useEffect(() => {
-    (async () => {
-      try {
-        setBucketId(user.email.replace(/@|\./gi, ""));
-      } catch (error) {
-        setIsLoading(false);
-        setErrorMassage(error.message);
-      }
-    })();
-  }, [user]);
-
-  useEffect(() => {
-    const {
-      isServerOn,
-      email,
-      clientId,
-      clientSecret,
-      tokens: { accessToken, refreshToken },
-    } = user;
-
     (async () => {
       const dataFromGoogle = await getCsvFromGoogleStorage(
         {
@@ -92,7 +81,7 @@ function EditGlossary() {
       setGlossary(dataFromGoogle.glossaryData);
       setIsLoading(false);
     })();
-  }, [user]);
+  }, []);
 
   const handleWordsChange = (event) => {
     const { name, value } = event.target;
@@ -142,14 +131,6 @@ function EditGlossary() {
 
   const handleEditGlossary = async () => {
     setIsLoading(true);
-
-    const {
-      isServerOn,
-      projectId,
-      clientId,
-      clientSecret,
-      tokens: { accessToken, refreshToken },
-    } = user;
 
     if (!hasBucket) {
       await createBucket({ bucketId, projectId, accessToken }, setErrorMassage);
