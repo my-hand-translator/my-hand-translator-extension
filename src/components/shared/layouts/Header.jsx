@@ -27,9 +27,6 @@ function Header() {
           <div className="logo">My Hand</div>
 
           <Nav>
-            <NavLink to="/" exact activeClassName="selected">
-              번역하기
-            </NavLink>
             <NavLink to={MY_GLOSSARY} activeClassName="selected">
               내 용어집 편집
             </NavLink>

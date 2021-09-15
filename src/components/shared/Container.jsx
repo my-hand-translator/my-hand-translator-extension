@@ -40,6 +40,10 @@ const ContainerStyled = styled("div", {
       spaceEvenly: { justifyContent: "space-evenly" },
     },
 
+    alignContent: {
+      start: { alignContent: "flex-start" },
+    },
+
     align: {
       start: { alignItems: "flex-start" },
       end: { alignItems: "flex-end" },

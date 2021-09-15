@@ -6,7 +6,6 @@ import EditGlossary from "./EditGlossary";
 import Popup from "./Popup";
 import DetailOtherGlossary from "./DetailOtherGlossary";
 import Layout from "./shared/layouts";
-import TabContainer from "./shared/TabContainer";
 import OtherGlossaries from "./OtherGlossaries";
 
 import {
@@ -22,11 +21,6 @@ function Options() {
     <Router>
       <Layout>
         <Switch>
-          <Route exact path="/">
-            <TabContainer>
-              <Popup />
-            </TabContainer>
-          </Route>
           <Route exact path={POPUP}>
             <Popup />
           </Route>

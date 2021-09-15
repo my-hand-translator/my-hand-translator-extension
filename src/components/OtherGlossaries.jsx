@@ -3,30 +3,16 @@ import React, { useEffect, useRef, useState } from "react";
 import Title from "./shared/Title";
 import Container from "./shared/Container";
 import ErrorStyled from "./shared/Error";
-import OtherGlossary from "./OtherGlossary";
-
+import TabContainer from "./shared/TabContainer";
 import Button from "./shared/Button";
+import OtherGlossary from "./OtherGlossary";
 
 import { getGlossaries } from "../services/glossaryService";
 import { styled } from "../config/stitches.config";
 import chromeStore from "../utils/chromeStore";
 import debounce from "../utils/utils";
 
-const HeaderContainer = styled(Container, {
-  marginBottom: "1em",
-});
-
-const GlossaryContainer = styled(Container, {
-  width: "100%",
-});
-
-const FormContainer = styled(Container, {
-  width: "90%",
-});
-
 const FormContent = styled("form", {
-  marginBottom: "1em",
-
   "& input": {
     marginRight: "0.5em",
   },
@@ -98,6 +84,10 @@ export default function OtherGlossaries() {
   };
 
   const handleSearchButtonClick = async () => {
+    if (!searchValue) {
+      return setError("검색어를 입력해주세요.");
+    }
+
     const serverGlossaries = await getGlossaries(
       user,
       currentPage,
@@ -106,17 +96,19 @@ export default function OtherGlossaries() {
     );
 
     setGlossaries(serverGlossaries);
-    setIsSearched(true);
+    return setIsSearched(true);
   };
 
   return (
     <>
-      <HeaderContainer justify="center" align="center">
-        <Title>내 번역 기록 보기</Title>
-        {error && <ErrorStyled>{error}</ErrorStyled>}
-      </HeaderContainer>
-      <GlossaryContainer justify="center" align="center" flex="column">
-        <FormContainer justify="end">
+      <Container justify="center" align="itemCenter">
+        <Title>다른 사람 용어집 목록</Title>
+      </Container>
+
+      <TabContainer>
+        <Container justify="spaceBetween" align="itemCenter">
+          <ErrorStyled>{error}</ErrorStyled>
+
           <FormContent>
             <input
               type="text"
@@ -133,13 +125,17 @@ export default function OtherGlossaries() {
               검색
             </Button>
           </FormContent>
-        </FormContainer>
-        {glossaries.length !== 0 &&
-          glossaries.map((glossary) => {
-            return <OtherGlossary glossary={glossary}>test</OtherGlossary>;
-          })}
-      </GlossaryContainer>
-      {!isSearched && <div ref={observedElement} />}
+        </Container>
+
+        <div>
+          {glossaries.length !== 0 &&
+            glossaries.map((glossary) => {
+              return <OtherGlossary glossary={glossary}>test</OtherGlossary>;
+            })}
+        </div>
+
+        {!isSearched && <div ref={observedElement} />}
+      </TabContainer>
     </>
   );
 }

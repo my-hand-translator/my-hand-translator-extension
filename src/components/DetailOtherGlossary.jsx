@@ -160,6 +160,7 @@ function DetailOtherGlossary() {
         <Title>다른 사람의 용어집</Title>
         <div>
           <Button
+            bgColor="blue"
             size="midium"
             css={{ margin: "10px" }}
             onClick={mergeGlossary}
@@ -167,6 +168,7 @@ function DetailOtherGlossary() {
             병합하기
           </Button>
           <Button
+            bgColor="blue"
             size="midium"
             css={{ margin: "10px" }}
             onClick={applyGlossary}
@@ -184,6 +186,7 @@ function DetailOtherGlossary() {
           <GlossaryList
             glossaries={myGlossary}
             buttonText="삭제"
+            buttonColor="warning"
             onButtonClick={handleDeleteGlossary}
           />
         </GlossaryListWrap>
