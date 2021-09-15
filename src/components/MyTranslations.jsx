@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useSelector } from "react-redux";
+import { shallowEqual, useSelector } from "react-redux";
 
 import Title from "./shared/Title";
 import ErrorStyled from "./shared/Error";
@@ -14,7 +14,7 @@ import debounce from "../utils/utils";
 import {
   createTranslationParam,
   getTranslations,
-  combineTranslations,
+  sendTranslations,
 } from "../services/translationService";
 
 const FormContent = styled("form", {
@@ -28,58 +28,63 @@ const DEBOUNCE_DELAY = 500;
 
 function MyTranslations() {
   const [translations, setTranslations] = useState([]);
-  const [splitIndex, setSplitIndex] = useState(0);
+  const [page, setPage] = useState(0);
   const [isSearched, setIsSearched] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [error, setError] = useState("");
 
   const observedElement = useRef();
 
-  const isServerOn = useSelector((state) => state.user.isServerOn);
-  const storageTranslations = useSelector((state) => state.user.translations);
-  const idToken = useSelector((state) => state.user.tokens.idToken);
-  const email = useSelector((state) => state.user.email);
+  const user = useSelector((state) => state.user, shallowEqual);
+  const {
+    clientId,
+    translations: storageTranslations,
+    isServerOn,
+    tokens: { idToken },
+    email,
+  } = user;
 
   useEffect(() => {
     (async () => {
       try {
         if (isServerOn) {
-          const params = createTranslationParam(1, 100);
-          const serverTransitions = await getTranslations(
-            email,
-            idToken,
-            params,
-          );
-
-          const combinedTranslations = combineTranslations(
-            storageTranslations,
-            serverTransitions,
-          );
-
-          setTranslations(combinedTranslations);
-          setSplitIndex(SPLIT_UNIT);
+          try {
+            sendTranslations(email, idToken, translations);
+          } catch (err) {
+            setError(err.message);
+          }
 
           return;
         }
 
         setTranslations(storageTranslations);
-        setSplitIndex(SPLIT_UNIT);
       } catch (err) {
         setError(err.message);
       }
     })();
-  }, [isServerOn, email, idToken, storageTranslations]);
+  }, []);
 
   useEffect(() => {
     const handleObserver = (entries) => {
       const target = entries[0];
 
-      const debounceSetSplitIndex = debounce((value) => {
-        setSplitIndex(value);
+      const debounceGetTranslations = debounce(async (value) => {
+        if (isServerOn) {
+          const params = createTranslationParam(value, SPLIT_UNIT);
+          const serverTransitions = await getTranslations(
+            email,
+            idToken,
+            params,
+            clientId,
+          );
+
+          setTranslations([...translations, ...serverTransitions]);
+          setPage(value);
+        }
       }, DEBOUNCE_DELAY);
 
       if (target.isIntersecting) {
-        debounceSetSplitIndex(splitIndex + SPLIT_UNIT);
+        debounceGetTranslations(page + 1);
       }
     };
 
@@ -93,7 +98,7 @@ function MyTranslations() {
     return () => {
       observer.unobserve(currentObservedElement);
     };
-  }, [splitIndex]);
+  }, [page, translations]);
 
   const handleSearchValue = (value) => {
     setSearchValue(value);
@@ -104,10 +109,12 @@ function MyTranslations() {
       return translationToFilter.nanoId !== translation.nanoId;
     });
 
-    chromeStore.set("translations", filteredTranslations);
+    chromeStore.set("userData", {
+      ...user,
+      translations: filteredTranslations,
+    });
 
     setTranslations(filteredTranslations);
-    setSplitIndex(filteredTranslations.length);
   };
 
   const handleSearchButtonClick = () => {
@@ -119,7 +126,6 @@ function MyTranslations() {
     });
 
     setTranslations(searchedTranslations);
-    setSplitIndex(searchedTranslations.length);
     setIsSearched(true);
     setSearchValue("");
   };
@@ -154,18 +160,14 @@ function MyTranslations() {
 
         <div className="translation-list">
           {translations.length !== 0 &&
-            translations.map((translation, index) => {
-              if (index < splitIndex) {
-                return (
-                  <MyTranslation
-                    key={translation.nanoId}
-                    translation={translation}
-                    onClick={handleDeleteButton}
-                  />
-                );
-              }
-
-              return null;
+            translations.map((translation) => {
+              return (
+                <MyTranslation
+                  key={translation.nanoId}
+                  translation={translation}
+                  onClick={handleDeleteButton}
+                />
+              );
             })}
         </div>
       </TabContainer>

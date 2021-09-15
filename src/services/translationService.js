@@ -9,7 +9,7 @@ const DECIMAL_POINT = 2;
 const PERCENTAGE = 100;
 const SIMILARITY = 95;
 
-export const getTranslations = async (email, idToken, params) => {
+export const getTranslations = async (email, idToken, params, clientId) => {
   const response = await fetch(
     `${process.env.SERVER_URL}/translations/${email}?${params}`,
     {
@@ -17,6 +17,7 @@ export const getTranslations = async (email, idToken, params) => {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${idToken}`,
+        "Client-Id": clientId,
       },
     },
   );
@@ -28,6 +29,26 @@ export const getTranslations = async (email, idToken, params) => {
   }
 
   return data.data;
+};
+
+export const sendTranslations = async (email, idToken, translations) => {
+  const response = await fetch(`${process.env.SERVER_URL}/translations`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${idToken}`,
+    },
+    body: JSON.stringify({
+      email,
+      translations,
+    }),
+  });
+
+  const data = await response.json();
+
+  if (data.result === "error") {
+    throw data;
+  }
 };
 
 export const createTranslationParam = (page, limit) => {
@@ -43,14 +64,14 @@ export const combineTranslations = (
   storageTranslations,
   serverTranslations,
 ) => {
-  const combinedTranslations = serverTranslations;
+  const combinedTranslations = storageTranslations;
   const uniqueNanoIds = new Set();
 
   combinedTranslations.forEach((combinedTranslation) => {
     uniqueNanoIds.add(combinedTranslation.nanoId);
   });
 
-  storageTranslations.forEach((storageTranslation) => {
+  serverTranslations.forEach((storageTranslation) => {
     if (!uniqueNanoIds.has(storageTranslation.nanoId)) {
       combinedTranslations.push(storageTranslation);
     }
