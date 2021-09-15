@@ -5,14 +5,10 @@ import Button from "./shared/Button";
 import ErrorStyled from "./shared/Error";
 
 import { styled } from "../config/stitches.config";
-import { URLS } from "../constants/auth";
 
-import {
-  createOAuthParams,
-  createTokenParams,
-  getTokens,
-} from "../services/oAuthService";
 import { SIGNING_STATUS } from "../constants/user";
+import chromeIdentity from "../utils/chromeIdentity";
+import chromeStore from "../utils/chromeStore";
 
 const LoginStyled = styled("div", {
   width: "40em",
@@ -21,6 +17,8 @@ const LoginStyled = styled("div", {
   justifyContent: "center",
   alignItems: "center",
   flexDirection: "column",
+  alignSelf: "center",
+  gap: "30px",
 });
 
 const HeaderStyled = styled("h1", {
@@ -53,53 +51,36 @@ const initialFormData = {
 export default function GoogleOAuth({ handleOAuthResult }) {
   const [formData, setFormData] = useState(initialFormData);
   const [isEnrolled, setIsEnrolled] = useState(false);
-  const [error, setError] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const handleClickGoogleOAuth = () => {
-    const oAuthParams = createOAuthParams(formData);
-    const url = `${URLS.GOOGLE_AUTH}?${oAuthParams}`;
+  const handleClickGoogleOAuth = async () => {
+    try {
+      const tokens = await chromeIdentity.getTokensByOAuth(formData);
+      const email = await chromeIdentity.getUserEmail();
 
-    chrome.identity.launchWebAuthFlow(
-      { url, interactive: true },
-      async (redirectURL) => {
-        try {
-          const responseURL = new URL(redirectURL);
-          const code = responseURL.searchParams.get("code");
+      const initialUserData = {
+        email,
+        clientSecret: formData.clientSecret,
+        clientId: formData.clientId,
+        projectId: formData.projectId,
+        bucketId: email.replace(/@|\./g, ""),
+        name: email.split("@")[0],
+        tokens,
+        signed: SIGNING_STATUS.NOT_CONFIRMED,
+        glossary: null,
+        glossaryId: "",
+        isServerOn: false,
+        translations: [],
+      };
 
-          const tokenParams = createTokenParams(formData, code);
-          const tokenURL = `${URLS.TOKEN}?${tokenParams}&redirect_uri=${formData.redirectURI}&code=${code}`;
-          const tokens = await getTokens(tokenURL);
+      await chromeStore.set("userData", initialUserData);
 
-          if (tokens) {
-            chrome.identity.getProfileUserInfo(({ email }) => {
-              chrome.storage.sync.set({
-                userData: {
-                  email,
-                  clientId: formData.clientId,
-                  clientSecret: formData.clientSecret,
-                  projectId: formData.projectId,
-                  name: email.split("@")[0],
-                  tokens,
-                  signed: SIGNING_STATUS.NOT_CONFIRMED,
-                  glossary: null,
-                  glossaryId: "",
-                  isServerOn: false,
-                  translations: [],
-                },
-              });
-
-              handleOAuthResult(true);
-            });
-          }
-        } catch (err) {
-          return setError(err.message);
-        }
-
-        setIsEnrolled(false);
-
-        return handleOAuthResult(false);
-      },
-    );
+      handleOAuthResult(true);
+    } catch (error) {
+      setErrorMessage(error.message);
+      setIsEnrolled(false);
+      handleOAuthResult(false);
+    }
   };
 
   const handleSubmitFormData = (event) => {
@@ -155,7 +136,7 @@ export default function GoogleOAuth({ handleOAuthResult }) {
         </FormStyled>
       )}
 
-      {error && <ErrorStyled>{error}</ErrorStyled>}
+      {errorMessage && <ErrorStyled>{errorMessage}</ErrorStyled>}
     </LoginStyled>
   );
 }
