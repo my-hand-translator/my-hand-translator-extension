@@ -41,6 +41,12 @@ export default function Popup() {
   const [translationResult, setTranslationResult] = useState({});
 
   useEffect(() => {
+    chrome.storage.onChanged.addListener(({ userData }) => {
+      setUser(userData.newValue);
+    });
+  }, []);
+
+  useEffect(() => {
     (async () => {
       try {
         const userData = await chromeStore.get("userData");
@@ -49,8 +55,6 @@ export default function Popup() {
           const glossary = await getGlossaryFromGoogleCloudAPI(userData);
 
           await chromeStore.set("userData", { ...userData, glossary });
-
-          setUser(userData);
           setIsServerOn(userData.isServerOn);
 
           return setIsOAuthSuccess(true);
@@ -74,8 +78,6 @@ export default function Popup() {
     } catch (err) {
       setError(err.message);
     }
-
-    setUser(newUser);
   };
 
   const synchronizeUserAndServer = async (userData) => {
@@ -103,8 +105,6 @@ export default function Popup() {
     }
 
     await chromeStore.set("userData", newUserData);
-
-    setUser(newUserData);
 
     const addingTranslationResponse = await addTranslations(userData);
 
@@ -137,8 +137,6 @@ export default function Popup() {
 
       await chromeStore.set("userData", newUserData);
       await chromeStore.set("glossaryId", loginResult.glossaryId);
-
-      setUser(newUserData);
 
       await updateUserSigningStatus(loginResult.isUser);
 
@@ -211,7 +209,7 @@ export default function Popup() {
           </ContainerStyled>
 
           {user?.signed === SIGNING_STATUS.UNDERWAY ? (
-            <Signup handleSignupResult={handleSignupResult} />
+            <Signup handleSignupResult={handleSignupResult} user={user} />
           ) : (
             <>
               <Translation
