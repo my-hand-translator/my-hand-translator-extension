@@ -49,7 +49,10 @@ export default function TextSelection() {
 
     const handleMouseup = ({ pageX, pageY }) => {
       setIsSelectionEnd(true);
-      setTextSelected(document.getSelection().toString().trim());
+
+      if (!isBoxVisible) {
+        setTextSelected(document.getSelection().toString().trim());
+      }
 
       if (!isButtonClicked) {
         setBoxPosition({ left: pageX, top: pageY });
