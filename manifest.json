@@ -10,7 +10,7 @@
     "128": "images/icon-128.png"
   },
   "background": {
-    "service_worker": "./background.js"
+    "service_worker": "./background.bundle.js"
   },
   "action": {
     "default_popup": "./popup.html",
@@ -22,12 +22,6 @@
     }
   },
   "options_page": "./options.html",
-  "permissions": [
-    "tabs",
-    "storage",
-    "scripting",
-    "identity",
-    "identity.email"
-  ],
+  "permissions": ["tabs", "storage", "scripting", "identity", "identity.email"],
   "host_permissions": ["<all_urls>"]
 }

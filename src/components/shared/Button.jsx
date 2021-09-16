@@ -3,6 +3,9 @@ import { styled } from "../../config/stitches.config";
 const Button = styled("button", {
   border: "none",
 
+  wordBreak: "keep-all",
+  overflowWrap: "break-word",
+
   color: "white",
   fontWeight: "bold",
   fontSize: "1rem",

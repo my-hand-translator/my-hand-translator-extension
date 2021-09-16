@@ -1,8 +1,16 @@
+import chromeStore from "./utils/chromeStore";
+
 const injectTextSelectionComponent = () => {
   const div = document.createElement("div");
   div.id = "textSelection";
   document.body.appendChild(div);
 };
+
+async function getCurrentTab() {
+  const queryOptions = { active: true, currentWindow: true };
+  const [tab] = await chrome.tabs.query(queryOptions);
+  return tab;
+}
 
 chrome.runtime.onInstalled.addListener(() => {
   console.log("Chrome extension is successfully installed!");
@@ -19,17 +27,14 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
         target: { tabId },
         files: ["./textSelection.bundle.js"],
       });
+      const { url: currentUrl } = await getCurrentTab();
+
+      await chromeStore.set("currentUrl", currentUrl);
     } catch (error) {
       console.log(error);
     }
   }
 });
-
-async function getCurrentTab() {
-  const queryOptions = { active: true, currentWindow: true };
-  const [tab] = await chrome.tabs.query(queryOptions);
-  return tab;
-}
 
 chrome.tabs.onActivated.addListener(async () => {
   const { url: currentUrl } = await getCurrentTab();

@@ -13,6 +13,7 @@ module.exports = {
     popup: path.resolve(__dirname, "./src/index-popup.jsx"),
     options: path.resolve(__dirname, "./src/index-options.jsx"),
     textSelection: path.resolve(__dirname, "./src/index-textSelection.jsx"),
+    background: path.resolve(__dirname, "./src/background.js"),
   },
   output: {
     path: path.join(__dirname, "./dist"),
@@ -45,7 +46,6 @@ module.exports = {
     new CopyWebpackPlugin({
       patterns: [
         { from: "./manifest.json", to: "[name][ext]" },
-        { from: "./src/background.js", to: "[name][ext]" },
         { from: "./public/images/*.png", to: "images/[name][ext]" },
       ],
     }),
