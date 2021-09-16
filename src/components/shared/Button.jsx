@@ -6,6 +6,7 @@ const Button = styled("button", {
   color: "white",
   fontWeight: "bold",
   fontSize: "1rem",
+  padding: "5px",
 
   backgroundColor: "$lightBlue",
 

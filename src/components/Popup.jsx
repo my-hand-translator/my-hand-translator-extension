@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 
+import { styled } from "../config/stitches.config";
+
 import ContainerStyled from "./shared/Container";
 import ErrorStyled from "./shared/Error";
 import Button from "./shared/Button";
@@ -20,10 +22,8 @@ import {
   getTranslationResult,
   googleTranslate,
 } from "../services/translationService";
-
-import { SIGNING_STATUS } from "../constants/user";
 import chromeStore from "../utils/chromeStore";
-import { styled } from "../config/stitches.config";
+import { SIGNING_STATUS } from "../constants/user";
 
 const TAB_BASE_URL = `chrome-extension://${chrome.runtime.id}/options.html#/`;
 
@@ -36,9 +36,10 @@ export default function Popup() {
   const [isOAuthSuccess, setIsOAuthSuccess] = useState(false);
   const [isServerOn, setIsServerOn] = useState(false);
   const [user, setUser] = useState(null);
-  const [error, setError] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const [originText, setOriginText] = useState("");
   const [translationResult, setTranslationResult] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     chrome.storage.onChanged.addListener(({ userData }) => {
@@ -47,6 +48,8 @@ export default function Popup() {
   }, []);
 
   useEffect(() => {
+    setIsLoading(true);
+
     (async () => {
       try {
         const userData = await chromeStore.get("userData");
@@ -54,15 +57,21 @@ export default function Popup() {
         if (userData) {
           const glossary = await getGlossaryFromGoogleCloudAPI(userData);
 
-          await chromeStore.set("userData", { ...userData, glossary });
-          setIsServerOn(userData.isServerOn);
+          if (!glossary) {
+            setIsOAuthSuccess(true);
+          } else {
+            await chromeStore.set("userData", { ...userData, glossary });
+            setIsServerOn(userData.isServerOn);
 
-          return setIsOAuthSuccess(true);
+            setIsOAuthSuccess(true);
+          }
+        } else {
+          setIsOAuthSuccess(false);
         }
-
-        return setIsOAuthSuccess(false);
-      } catch (err) {
-        return setError(err);
+      } catch (error) {
+        setErrorMessage(error.message);
+      } finally {
+        setIsLoading(false);
       }
     })();
   }, [isOAuthSuccess]);
@@ -76,13 +85,13 @@ export default function Popup() {
     try {
       await chromeStore.set("userData", newUser);
     } catch (err) {
-      setError(err.message);
+      setErrorMessage(err.message);
     }
   };
 
   const synchronizeUserAndServer = async (userData) => {
     if (!userData) {
-      return setError("유저 데이터가 없습니다.");
+      return setErrorMessage("유저 데이터가 없습니다.");
     }
 
     const gettingGlossaryResponse = await getGlossary(userData);
@@ -101,7 +110,7 @@ export default function Popup() {
     const editingGlossaryResponse = await editGlossary(newUserData);
 
     if (editingGlossaryResponse.result !== "ok") {
-      setError(editingGlossaryResponse.error.message);
+      setErrorMessage(editingGlossaryResponse.error.message);
     }
 
     await chromeStore.set("userData", newUserData);
@@ -109,7 +118,7 @@ export default function Popup() {
     const addingTranslationResponse = await addTranslations(userData);
 
     if (addingTranslationResponse.result !== "ok") {
-      setError(addingTranslationResponse.error.message);
+      setErrorMessage(addingTranslationResponse.error.message);
     }
 
     return true;
@@ -146,7 +155,7 @@ export default function Popup() {
 
       return setIsServerOn(true);
     } catch (err) {
-      setError(err.message);
+      setErrorMessage(err.message);
 
       return setIsServerOn(false);
     }
@@ -154,6 +163,7 @@ export default function Popup() {
 
   const handleSignupResult = async (isSignupSuccess) => {
     setIsServerOn(isSignupSuccess);
+
     await updateUserSigningStatus(isSignupSuccess);
   };
 
@@ -162,14 +172,14 @@ export default function Popup() {
   };
 
   const handleClickTranslation = async () => {
-    setError("");
+    setErrorMessage("");
 
     try {
       const result = await getTranslationResult(user, originText);
 
       setTranslationResult(result);
     } catch (err) {
-      setError(err);
+      setErrorMessage(err);
     }
   };
 
@@ -179,7 +189,7 @@ export default function Popup() {
 
       setTranslationResult(result);
     } catch (err) {
-      setError(err);
+      setErrorMessage(err);
     }
   };
 
@@ -191,9 +201,21 @@ export default function Popup() {
     <PopupContainer flex="column">
       <Title align="center">내 손 번역</Title>
 
-      {error && <ErrorStyled>{error}</ErrorStyled>}
+      {errorMessage && <ErrorStyled>{errorMessage}</ErrorStyled>}
 
-      {isOAuthSuccess ? (
+      {isLoading && "Loading ..."}
+
+      {!isLoading && user && !user.glossary && (
+        <Button
+          name="my-glossary"
+          bgColor="lightBlue"
+          onClick={handleClickOptionButton}
+        >
+          내 용어집 {user?.glossary ? "편집" : "생성"} 하기
+        </Button>
+      )}
+
+      {!isLoading && user && user.glossary && (
         <ContainerStyled flex="column">
           <ContainerStyled flex="row" justify="spaceBetween">
             <Button bgColor="blue" onClick={handleClickTranslation}>
@@ -208,7 +230,7 @@ export default function Popup() {
             </Button>
           </ContainerStyled>
 
-          {user?.signed === SIGNING_STATUS.UNDERWAY ? (
+          {!isLoading && user?.signed === SIGNING_STATUS.UNDERWAY ? (
             <Signup handleSignupResult={handleSignupResult} user={user} />
           ) : (
             <>
@@ -219,7 +241,11 @@ export default function Popup() {
                 handleClickGoogleTranslate={handleClickGoogleTranslate}
               />
 
-              <ContainerStyled flex="row" justify="spaceBetween">
+              <ContainerStyled
+                css={{ gap: "30px" }}
+                flex="row"
+                justify="spaceBetween"
+              >
                 <Button
                   name="my-glossary"
                   bgColor="lightBlue"
@@ -235,20 +261,23 @@ export default function Popup() {
                 >
                   내 번역 기록 보기
                 </Button>
+
+                {isServerOn && (
+                  <Button
+                    name="other-glossaries"
+                    bgColor="lightBlue"
+                    onClick={handleClickOptionButton}
+                  >
+                    다른 사람 용어집 구경하기
+                  </Button>
+                )}
               </ContainerStyled>
-              {isServerOn && (
-                <Button
-                  name="other-glossaries"
-                  bgColor="lightBlue"
-                  onClick={handleClickOptionButton}
-                >
-                  다른 사람 용어집 구경하기
-                </Button>
-              )}
             </>
           )}
         </ContainerStyled>
-      ) : (
+      )}
+
+      {!isLoading && !isOAuthSuccess && (
         <Login handleOAuthResult={setIsOAuthSuccess} />
       )}
     </PopupContainer>

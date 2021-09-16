@@ -65,9 +65,9 @@ const findSimilarTarget = (words, targets, similarity) => {
   }
 
   for (let i = 0; i < targets.length; i += 1) {
-    const { text } = targets[i];
+    const { origin } = targets[i];
     const includedRate = Math.floor(
-      (words.length / text.length).toFixed(DECIMAL_POINT) * PERCENTAGE,
+      (words.length / origin.length).toFixed(DECIMAL_POINT) * PERCENTAGE,
     );
 
     if (includedRate >= similarity) {
@@ -79,8 +79,8 @@ const findSimilarTarget = (words, targets, similarity) => {
 };
 
 export const getTranslationFromChromeStorage = (translations, originText) => {
-  const translationsIncludingOrigin = translations.filter(({ text }) =>
-    text.includes(originText),
+  const translationsIncludingOrigin = translations.filter(({ origin }) =>
+    origin.includes(originText),
   );
 
   const translation = findSimilarTarget(
@@ -145,9 +145,9 @@ export const getTranslationFromGoogleCloudAPI = async (
 };
 
 export const getGlossaryFromGoogleCloudAPI = async ({
-  email,
   clientId,
   clientSecret,
+  bucketId,
   tokens: { refreshToken },
 }) => {
   const { accessToken } = await refreshAndGetNewTokens(
@@ -156,8 +156,7 @@ export const getGlossaryFromGoogleCloudAPI = async ({
     refreshToken,
   );
 
-  const bucketName = email.replace(/@|\./g, "");
-  const url = `https://storage.googleapis.com/storage/v1/b/${bucketName}/o/my-glossary.csv?alt=media`;
+  const url = `https://storage.googleapis.com/storage/v1/b/${bucketId}/o/my-glossary.csv?alt=media`;
 
   const response = await fetch(url, {
     headers: {
@@ -168,7 +167,10 @@ export const getGlossaryFromGoogleCloudAPI = async ({
 
   const data = await response.text();
 
-  if (data === `No such object: ${bucketName}/my-glossary.csv`) {
+  if (
+    data === `No such object: ${bucketId}/my-glossary.csv` ||
+    data === "The specified bucket does not exist."
+  ) {
     return null;
   }
 
@@ -211,7 +213,7 @@ export const googleTranslate = async (user, originText) => {
   const currentUrl = await chromeStore.get("currentUrl");
 
   const currentTranslationResult = {
-    text: originText,
+    origin: originText,
     translated: translatedText,
     url: currentUrl,
     glossary: user.glossary,
