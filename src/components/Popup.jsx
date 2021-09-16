@@ -172,24 +172,32 @@ export default function Popup() {
   };
 
   const handleClickTranslation = async () => {
+    if (!originText.trim()) {
+      return setErrorMessage("번역할 텍스트가 없습니다.");
+    }
+
     setErrorMessage("");
 
     try {
       const result = await getTranslationResult(user, originText);
 
-      setTranslationResult(result);
+      return setTranslationResult(result);
     } catch (err) {
-      setErrorMessage(err);
+      return setErrorMessage(err);
     }
   };
 
   const handleClickGoogleTranslate = async () => {
+    if (!originText.trim()) {
+      return setErrorMessage("번역할 텍스트가 없습니다.");
+    }
+
     try {
       const result = await googleTranslate(user, originText);
 
-      setTranslationResult(result);
+      return setTranslationResult(result);
     } catch (err) {
-      setErrorMessage(err);
+      return setErrorMessage(err);
     }
   };
 
@@ -230,7 +238,9 @@ export default function Popup() {
             </Button>
           </ContainerStyled>
 
-          {!isLoading && user?.signed === SIGNING_STATUS.UNDERWAY ? (
+          {!isLoading &&
+          isServerOn &&
+          user?.signed === SIGNING_STATUS.UNDERWAY ? (
             <Signup handleSignupResult={handleSignupResult} user={user} />
           ) : (
             <>
