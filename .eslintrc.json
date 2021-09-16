@@ -2,7 +2,8 @@
   "env": {
     "es2021": true,
     "node": true,
-    "browser": true
+    "browser": true,
+    "jest": true
   },
   "parser": "babel-eslint",
   "parserOptions": {
@@ -34,10 +35,21 @@
         "props": true,
         "ignorePropertyModificationsFor": ["state"]
       }
+    ],
+    "import/no-extraneous-dependencies": [
+      "error",
+      {
+        "devDependencies": ["**/*.test.jsx", "**/test-utils.jsx"]
+      }
     ]
   },
   "globals": {
     "chrome": "writable"
   },
-  "ignorePatterns": ["**/node_modules", "**/dist"]
+  "ignorePatterns": [
+    "**/node_modules",
+    "**/dist",
+    "**/test-utils.jsx",
+    "**/*.test.jsx"
+  ]
 }
