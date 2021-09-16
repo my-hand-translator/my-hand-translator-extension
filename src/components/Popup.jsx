@@ -28,8 +28,8 @@ import { SIGNING_STATUS } from "../constants/user";
 const TAB_BASE_URL = `chrome-extension://${chrome.runtime.id}/options.html#/`;
 
 const PopupContainer = styled(ContainerStyled, {
-  width: "400px",
-  height: "fit-content",
+  width: "fit-content",
+  height: "max-content",
 });
 
 export default function Popup() {
@@ -207,7 +207,7 @@ export default function Popup() {
 
   return (
     <PopupContainer flex="column">
-      <Title align="center">내 손 번역</Title>
+      <Title align="center">내손번역</Title>
 
       {errorMessage && <ErrorStyled>{errorMessage}</ErrorStyled>}
 

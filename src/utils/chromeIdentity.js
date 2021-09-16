@@ -1,16 +1,16 @@
-import ERROR from "../constants/errorMessage";
 import { URLS } from "../constants/auth";
 import {
   createOAuthParams,
   createTokenParams,
   getTokens,
 } from "../services/oAuthService";
+import ERROR_MESSAGES from "../constants/errorMessage";
 
 const getUserEmail = () =>
   new Promise((resolve, reject) => {
     chrome.identity.getProfileUserInfo(({ email }) => {
       if (chrome.runtime.lastError) {
-        reject(ERROR.GET_PROFILE_USER_INFO);
+        reject(ERROR_MESSAGES.GET_PROFILE_USER_INFO);
       }
 
       resolve(email);
@@ -26,7 +26,7 @@ const getTokensByOAuth = (formData) =>
       { url, interactive: true },
       (redirectURL) => {
         if (chrome.runtime.lastError) {
-          reject(ERROR.LAUNCH_WEB_AUTH_FLOW);
+          reject(ERROR_MESSAGES.LAUNCH_WEB_AUTH_FLOW);
         }
 
         const responseURL = new URL(redirectURL);
@@ -41,11 +41,22 @@ const getTokensByOAuth = (formData) =>
 
             resolve(tokens);
           } catch (err) {
-            reject(ERROR.GET_TOKENS);
+            reject(ERROR_MESSAGES.GET_TOKENS);
           }
         })();
       },
     );
   });
 
-export default { getUserEmail, getTokensByOAuth };
+const getAccessToken = () =>
+  new Promise((resolve, reject) => {
+    chrome.identity.getAuthToken({ interactive: true }, (token) => {
+      if (chrome.runtime.lastError) {
+        reject(ERROR_MESSAGES.GET_TOKENS);
+      }
+
+      resolve(token);
+    });
+  });
+
+export default { getUserEmail, getTokensByOAuth, getAccessToken };
