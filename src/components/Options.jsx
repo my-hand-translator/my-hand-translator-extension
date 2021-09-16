@@ -24,7 +24,9 @@ function Options() {
 
   useEffect(() => {
     chrome.storage.onChanged.addListener(({ userData }) => {
-      dispatch(updateUser(userData.newValue));
+      if (userData) {
+        dispatch(updateUser(userData.newValue));
+      }
     });
 
     (async () => {
