@@ -52,7 +52,7 @@ export const getCsvFromGoogleStorage = async (
       }
 
       if (result === "The specified bucket does not exist.") {
-        return { hasBucket: false };
+        return { hasBucket: false, glossaryData: {} };
       }
 
       if (result === "Invalid Credentials") {
