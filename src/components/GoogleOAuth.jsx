@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 
+import { Link } from "react-router-dom";
 import Button from "./shared/Button";
 import ErrorStyled from "./shared/Error";
 
@@ -31,6 +32,7 @@ const FormStyled = styled("form", {
   alignItems: "center",
   flexDirection: "column",
   marginBottom: "1em",
+  gap: "20px",
 
   "& input": {
     marginBottom: "0.5em",
@@ -131,8 +133,17 @@ export default function GoogleOAuth({ handleOAuthResult }) {
           />
 
           <Button css={{ fontSize: "15px" }} type="submit" size="middle">
-            사용자 정보 입력하기
+            OAuth2 정보 입력하기
           </Button>
+          <div>
+            <a
+              target="_blank"
+              href="https://my-hand-translator.github.io/#/get-started"
+              rel="noreferrer"
+            >
+              OAuth2 입력 방법 알아보기
+            </a>
+          </div>
         </FormStyled>
       )}
 
