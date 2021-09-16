@@ -82,15 +82,17 @@ export default function Translation({
       </ContainerStyled>
 
       <ContainerStyled flex="column">
-        <SubTitle>번역 결과</SubTitle>
+        <SubTitle>
+          번역 결과{" "}
+          {notification && notification !== "구글 API" && (
+            <Button onClick={() => handleClickGoogleTranslate(originText)}>
+              내 용어집으로 번역하기
+            </Button>
+          )}
+        </SubTitle>
         {notification && (
           <SubTitle fontSize="middle" color="apricot">
             {notification} 에서 찾은 번역 결과입니다.
-            {notification !== "구글 API" && (
-              <Button onClick={() => handleClickGoogleTranslate(originText)}>
-                내 용어집으로 번역하기
-              </Button>
-            )}
           </SubTitle>
         )}
 

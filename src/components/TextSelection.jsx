@@ -63,8 +63,8 @@ export default function TextSelection() {
 
     const handleClickOutside = ({ target }) => {
       if (isBoxVisible && !boxRef.current?.contains(target)) {
-        setIsBoxVisible(false);
         setIsButtonClicked(false);
+        setIsBoxVisible(false);
         setTextSelected("");
       }
     };

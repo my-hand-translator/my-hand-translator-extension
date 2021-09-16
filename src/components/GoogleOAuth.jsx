@@ -130,7 +130,7 @@ export default function GoogleOAuth({ handleOAuthResult }) {
             value={formData.redirectURI}
           />
 
-          <Button type="submit" size="middle">
+          <Button css={{ fontSize: "15px" }} type="submit" size="middle">
             사용자 정보 입력하기
           </Button>
         </FormStyled>
