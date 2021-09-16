@@ -44,7 +44,7 @@ export default function OtherGlossary({ glossary }) {
             {keywords.length !== 0 &&
               keywords.map((keyword, index) => {
                 return (
-                  <span>
+                  <span key={keyword}>
                     {keyword}
                     {index === keywords.length - 1 ? "" : ", "}
                   </span>
@@ -65,8 +65,8 @@ OtherGlossary.propTypes = {
   glossary: PropTypes.shape({
     glossary: PropTypes.shape({
       keywords: PropTypes.arrayOf.isRequired,
-      updateAt: PropTypes.string.isRequired,
-      wordPairs: PropTypes.objectOf,
+      updateAt: PropTypes.string,
+      wordPairs: PropTypes.objectOf(PropTypes.string),
     }),
     userEmail: PropTypes.string.isRequired,
   }),

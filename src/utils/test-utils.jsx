@@ -23,4 +23,19 @@ function render(
 
 export * from "@testing-library/react";
 
-export { render };
+const user = {
+  clientId: "950605617290-fja07ouuq9tqihnksf0ac4jd50kpu3q4.apps.googleusercontent.com",
+  translations: [{
+    nanoId: "qWYBIfLPMsjP1LHNRqlFW",
+    origin: "react",
+    translated: "리액트",
+    url: "vanilla"
+  }],
+  isServerOn: false,
+  tokens: {
+    idToken: "asdnoifqjeirnqoer"
+  },
+  email: "aidencoders@gmail.com"
+};
+
+export { render, user };

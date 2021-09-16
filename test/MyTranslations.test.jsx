@@ -1,9 +1,10 @@
 import React from "react";
 import "@testing-library/jest-dom";
-
 import { useSelector } from "react-redux";
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent } from "@testing-library/react";
+
 import MyTranslations from "../src/components/MyTranslations";
+import { user } from "../src/utils/test-utils";
 
 jest.mock("react-redux");
 
@@ -18,10 +19,7 @@ describe("MyTranslations component test", () => {
         return null;
       }
 
-      observe(value) {
-        this.callback([{
-          isIntersecting: true,
-        }]);
+      observe() {
         return null;
       }
 
@@ -32,21 +30,6 @@ describe("MyTranslations component test", () => {
       unobserve() {
         return null;
       }
-    };
-
-    const user = {
-      clientId: "950605617290-fja07ouuq9tqihnksf0ac4jd50kpu3q4.apps.googleusercontent.com",
-      translations: [{
-        nanoId: "qWYBIfLPMsjP1LHNRqlFW",
-        origin: "react",
-        translated: "리액트",
-        url: "vanilla"
-      }],
-      isServerOn: false,
-      tokens: {
-        idToken: "asdnoifqjeirnqoer"
-      },
-      email: "aidencoders@gmail.com"
     };
 
     useSelector.mockImplementation((selector) =>
@@ -69,15 +52,17 @@ describe("MyTranslations component test", () => {
   });
 
   test("should to be able to search the contents.", () => {
-    const { getByText, getByPlaceholderText } = render(<MyTranslations />);
+    const { getByText, getByPlaceholderText, getByRole } = render(
+      <MyTranslations />,
+    );
 
     const input = getByPlaceholderText("검색어를 입력하세요.");
-    const button = getByText("검색");
+    const button = getByRole("button", { name: "검색" });
 
     fireEvent.change(input, {
       target: {
         value: "리액트",
-      }
+      },
     });
 
     fireEvent.click(button);

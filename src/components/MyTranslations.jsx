@@ -151,6 +151,7 @@ function MyTranslations() {
             <Button
               size="small"
               type="button"
+              name="검색"
               onClick={handleSearchButtonClick}
             >
               검색
