@@ -1,19 +1,20 @@
 import { PROJECT_API, STORAGE_API, STORAGE_UPLOAD_API } from "../constants/url";
+import chromeIdentity from "../utils/chromeIdentity";
 
 import { convertCsvToJson } from "../utils/convert";
 import fetchData, { createAuthHeader } from "../utils/fetchData";
-import { refreshAndGetNewTokens } from "./oAuthService";
 
 const GLOSSARY_NAME = "my-glossary";
 
-export const getGlossaries = async (idToken, page, limit, keyword = "") => {
+export const getGlossaries = async (page, limit, keyword = "") => {
+  const accessToken = await chromeIdentity.getAccessToken();
   const response = await fetch(
     `${process.env.SERVER_URL}/glossaries/?keywords=${keyword}&page=${page}&limit=${limit}`,
     {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${idToken}`,
+        Authorization: `Bearer ${accessToken}`,
       },
     },
   );
@@ -27,12 +28,8 @@ export const getGlossaries = async (idToken, page, limit, keyword = "") => {
   return data.data;
 };
 
-export const getCsvFromGoogleStorage = async (
-  { bucketId, clientId, clientSecret },
-  tokens,
-  errorHandler,
-) => {
-  const { accessToken, refreshToken } = tokens;
+export const getCsvFromGoogleStorage = async ({ bucketId }, errorHandler) => {
+  const accessToken = await chromeIdentity.getAccessToken();
   const authHeader = createAuthHeader(accessToken);
 
   try {
@@ -54,24 +51,6 @@ export const getCsvFromGoogleStorage = async (
       if (result === "The specified bucket does not exist.") {
         return { hasBucket: false, glossaryData: {} };
       }
-
-      if (result === "Invalid Credentials") {
-        const { accessToken: newAccessToken } = await refreshAndGetNewTokens(
-          clientId,
-          clientSecret,
-          refreshToken,
-        );
-
-        return await getCsvFromGoogleStorage(
-          {
-            bucketId,
-            clientId,
-            clientSecret,
-          },
-          { accessToken: newAccessToken, refreshToken },
-          errorHandler,
-        );
-      }
     }
 
     hasBucket = true;
@@ -86,15 +65,14 @@ export const getCsvFromGoogleStorage = async (
 };
 
 export const updateCsvFromGoogleStorage = async (
-  { csv, bucketId, clientId, clientSecret },
-  tokens,
+  { csv, bucketId },
   errorHandler,
 ) => {
-  const { accessToken, refreshToken } = tokens;
+  const accessToken = await chromeIdentity.getAccessToken();
   const authHeader = createAuthHeader(accessToken);
 
   try {
-    const response = await fetch(
+    await fetch(
       `${STORAGE_UPLOAD_API}/${bucketId}/o?uploadType=media&name=${GLOSSARY_NAME}.csv`,
       {
         method: "POST",
@@ -105,27 +83,9 @@ export const updateCsvFromGoogleStorage = async (
         body: csv,
       },
     );
-
-    const { error } = await response.json();
-
-    if (error?.message === "Invalid Credentials") {
-      const { accessToken: newAccessToken } = await refreshAndGetNewTokens(
-        clientId,
-        clientSecret,
-        refreshToken,
-      );
-
-      return await updateCsvFromGoogleStorage(
-        { csv, bucketId, clientId, clientSecret },
-        { accessToken: newAccessToken, refreshToken },
-        errorHandler,
-      );
-    }
   } catch (error) {
     errorHandler(error.message);
   }
-
-  return null;
 };
 
 export const getGlossaryFromServer = async (
@@ -173,10 +133,8 @@ export const updateGlossaryFromServer = async (
   }
 };
 
-export const createBucket = async (
-  { bucketId, projectId, accessToken },
-  errorHandler,
-) => {
+export const createBucket = async ({ bucketId, projectId }, errorHandler) => {
+  const accessToken = await chromeIdentity.getAccessToken();
   const authHeader = createAuthHeader(accessToken);
 
   const data = {
@@ -209,9 +167,10 @@ export const createBucket = async (
 };
 
 export const createGlossaryFromGoogleTranslation = async (
-  { projectId, accessToken, bucketId },
+  { projectId, bucketId },
   errorHandler,
 ) => {
+  const accessToken = await chromeIdentity.getAccessToken();
   const authHeader = createAuthHeader(accessToken);
 
   try {

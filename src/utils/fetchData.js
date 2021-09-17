@@ -1,11 +1,7 @@
-export const createAuthHeader = (token, clientId) => {
+export const createAuthHeader = (token) => {
   const authHeader = {
     Authorization: `Bearer ${token}`,
   };
-
-  if (clientId) {
-    authHeader["Client-Id"] = clientId;
-  }
 
   return authHeader;
 };

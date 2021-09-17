@@ -36,20 +36,14 @@ function MyTranslations() {
   const observedElement = useRef();
 
   const user = useSelector((state) => state.user, shallowEqual);
-  const {
-    clientId,
-    translations: storageTranslations,
-    isServerOn,
-    tokens: { idToken },
-    email,
-  } = user;
+  const { translations: storageTranslations, isServerOn, email } = user;
 
   useEffect(() => {
     (async () => {
       try {
         if (isServerOn) {
           try {
-            sendTranslations(email, idToken, translations);
+            await sendTranslations(email, translations);
           } catch (err) {
             setError(err.message);
           }
@@ -71,12 +65,7 @@ function MyTranslations() {
       const debounceGetTranslations = debounce(async (value) => {
         if (isServerOn) {
           const params = createTranslationParam(value, SPLIT_UNIT);
-          const serverTransitions = await getTranslations(
-            email,
-            idToken,
-            params,
-            clientId,
-          );
+          const serverTransitions = await getTranslations(email, params);
 
           setTranslations([...translations, ...serverTransitions]);
           setPage(value);

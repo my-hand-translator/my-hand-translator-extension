@@ -45,25 +45,12 @@ function EditGlossary() {
   const history = useHistory();
 
   const user = useSelector((state) => state.user);
-  const {
-    isServerOn,
-    email,
-    bucketId,
-    clientId,
-    projectId,
-    clientSecret,
-    tokens: { accessToken, refreshToken },
-  } = user;
+  const { isServerOn, email, bucketId, projectId } = user;
 
   useEffect(() => {
     (async () => {
       const dataFromGoogle = await getCsvFromGoogleStorage(
-        {
-          bucketId,
-          clientId,
-          clientSecret,
-        },
-        { accessToken, refreshToken },
+        { bucketId },
         setErrorMassage,
       );
 
@@ -71,7 +58,7 @@ function EditGlossary() {
 
       if (isServerOn && dataFromGoogle.hasBucket) {
         const dataFromServer = await getGlossaryFromServer(
-          { userId: email, accessToken },
+          { userId: email },
           setErrorMassage,
         );
 
@@ -133,7 +120,7 @@ function EditGlossary() {
     setIsLoading(true);
 
     if (!hasBucket) {
-      await createBucket({ bucketId, projectId, accessToken }, setErrorMassage);
+      await createBucket({ bucketId, projectId }, setErrorMassage);
     }
 
     const glossaryToCsv = convertObjectToCsv(glossary);
@@ -142,36 +129,23 @@ function EditGlossary() {
       {
         csv: glossaryToCsv,
         bucketId,
-        clientId,
-        clientSecret,
       },
-      { accessToken, refreshToken },
       setErrorMassage,
     );
 
     await createGlossaryFromGoogleTranslation(
-      { projectId, accessToken, bucketId },
+      { projectId, bucketId },
       setErrorMassage,
     );
 
     if (isServerOn) {
       const glossaryId = await chromeStore.get("glossaryId");
 
-      await updateGlossaryFromServer(
-        { glossaryId, glossary, accessToken },
-        setErrorMassage,
-      );
+      await updateGlossaryFromServer({ glossaryId, glossary }, setErrorMassage);
     }
 
     try {
-      const newUserData = {
-        ...user,
-        tokens: {
-          ...user.tokens,
-        },
-        glossary,
-        bucketId,
-      };
+      const newUserData = { ...user, glossary, bucketId };
 
       await chromeStore.set("userData", newUserData);
     } catch (error) {

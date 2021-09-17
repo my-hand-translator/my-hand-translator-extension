@@ -23,5 +23,16 @@
   },
   "options_page": "./options.html",
   "permissions": ["tabs", "storage", "scripting", "identity", "identity.email"],
-  "host_permissions": ["<all_urls>"]
+  "host_permissions": ["<all_urls>"],
+  "oauth2": {
+    "project_id": "YOUR PROJECT ID",
+    "client_id": "YOUR CLIENT ID",
+    "scopes": [
+      "https://www.googleapis.com/auth/userinfo.profile",
+      "https://www.googleapis.com/auth/userinfo.email",
+      "https://www.googleapis.com/auth/cloud-translation",
+      "https://www.googleapis.com/auth/devstorage.full_control",
+      "https://www.googleapis.com/auth/cloud-platform"
+    ]
+  }
 }
