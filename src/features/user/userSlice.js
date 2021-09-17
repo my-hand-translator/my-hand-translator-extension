@@ -3,8 +3,6 @@ import { createSlice } from "@reduxjs/toolkit";
 export const slice = createSlice({
   name: "user",
   initialState: {
-    clientId: "",
-    clientSecret: "",
     email: "",
     glossary: {},
     glossaryId: "",
@@ -12,11 +10,6 @@ export const slice = createSlice({
     name: "",
     projectId: "",
     signed: "",
-    tokens: {
-      accessToken: "",
-      idToken: "",
-      refreshToken: "",
-    },
     translations: [],
   },
   reducers: {

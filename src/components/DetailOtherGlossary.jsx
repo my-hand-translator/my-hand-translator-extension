@@ -39,22 +39,18 @@ function DetailOtherGlossary() {
   useEffect(() => {
     (async () => {
       try {
-        const {
-          email: myEmail,
-          isServerOn,
-          tokens: { accessToken },
-        } = user;
+        const { email: myEmail, isServerOn } = user;
 
         setHasServiceAccess(isServerOn);
 
         if (isServerOn) {
           const myGlossaryData = await getGlossaryFromServer(
-            { userId: myEmail, accessToken },
+            { userId: myEmail },
             setErrorMassage,
           );
 
           const otherGlossaryData = await getGlossaryFromServer(
-            { userId: otherEmail, accessToken },
+            { userId: otherEmail },
             setErrorMassage,
           );
 
@@ -96,43 +92,29 @@ function DetailOtherGlossary() {
   const applyGlossary = async () => {
     setIsLoading(true);
 
-    const {
-      projectId,
-      bucketId,
-      clientId,
-      clientSecret,
-      tokens: { accessToken, refreshToken },
-    } = user;
+    const { projectId, bucketId } = user;
 
     const glossaryId = await chromeStore.get("glossaryId");
-    const myGlossayToCsv = convertObjectToCsv(myGlossary);
+    const myGlossaryToCsv = convertObjectToCsv(myGlossary);
 
     await updateCsvFromGoogleStorage(
-      {
-        csv: myGlossayToCsv,
-        bucketId,
-        clientId,
-        clientSecret,
-      },
-      { accessToken, refreshToken },
+      { csv: myGlossaryToCsv, bucketId },
       errorMassage,
     );
 
     await createGlossaryFromGoogleTranslation(
-      { projectId, accessToken, bucketId },
+      { projectId, bucketId },
       setErrorMassage,
     );
 
     await updateGlossaryFromServer(
-      { glossaryId, glossary: myGlossary, accessToken },
+      { glossaryId, glossary: myGlossary },
       errorMassage,
     );
 
     const newUserData = {
       ...user,
-      tokens: {
-        ...user.tokens,
-      },
+
       glossaryId,
       glossary: myGlossary,
       bucketId,
@@ -161,7 +143,7 @@ function DetailOtherGlossary() {
         <div>
           <Button
             bgColor="blue"
-            size="midium"
+            size="medium"
             css={{ margin: "10px" }}
             onClick={mergeGlossary}
           >
@@ -169,7 +151,7 @@ function DetailOtherGlossary() {
           </Button>
           <Button
             bgColor="blue"
-            size="midium"
+            size="medium"
             css={{ margin: "10px" }}
             onClick={applyGlossary}
           >

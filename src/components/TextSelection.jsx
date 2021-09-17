@@ -23,7 +23,7 @@ const initialBoxPosition = {
 };
 
 const [RESIZE_X, RESIZE_Y] = [400, 600];
-const SCREEN_HALF = 0.5;
+const SCREEN_HALF_RATIO = 0.5;
 
 export default function TextSelection() {
   const [user, setUser] = useState(null);
@@ -93,10 +93,10 @@ export default function TextSelection() {
     setErrorMessage("");
     setIsBoxVisible(true);
     setIsButtonClicked(true);
-
-    const left = clientX / innerWidth < SCREEN_HALF ? pageX : pageX - RESIZE_X;
-    const top = clientY / innerHeight < SCREEN_HALF ? pageY : pageY - RESIZE_Y;
-
+    const left =
+      clientX / innerWidth < SCREEN_HALF_RATIO ? pageX : pageX - RESIZE_X;
+    const top =
+      clientY / innerHeight < SCREEN_HALF_RATIO ? pageY : pageY - RESIZE_Y;
     setBoxPosition({ left, top });
 
     try {

@@ -25,7 +25,8 @@
   "permissions": ["tabs", "storage", "scripting", "identity", "identity.email"],
   "host_permissions": ["<all_urls>"],
   "oauth2": {
-    "client_id": "asdasdasdasd",
+    "project_id": "YOUR PROJECT ID",
+    "client_id": "YOUR CLIENT ID",
     "scopes": [
       "https://www.googleapis.com/auth/userinfo.profile",
       "https://www.googleapis.com/auth/userinfo.email",

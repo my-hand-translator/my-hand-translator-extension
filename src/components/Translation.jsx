@@ -85,7 +85,7 @@ export default function Translation({
         <SubTitle>
           번역 결과{" "}
           {notification && notification !== "구글 API" && (
-            <Button onClick={() => handleClickGoogleTranslate(originText)}>
+            <Button onClick={handleClickGoogleTranslate}>
               내 용어집으로 번역하기
             </Button>
           )}

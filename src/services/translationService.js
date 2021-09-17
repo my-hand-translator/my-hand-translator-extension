@@ -1,7 +1,7 @@
 import { nanoid } from "nanoid";
 import END_POINTS from "../constants/server";
+import chromeIdentity from "../utils/chromeIdentity";
 import chromeStore from "../utils/chromeStore";
-import { refreshAndGetNewTokens } from "./oAuthService";
 
 const { WORDS, TRANSLATED, TRANSLATIONS } = END_POINTS;
 
@@ -9,15 +9,15 @@ const DECIMAL_POINT = 2;
 const PERCENTAGE = 100;
 const SIMILARITY = 95;
 
-export const getTranslations = async (email, idToken, params, clientId) => {
+export const getTranslations = async (email, params) => {
+  const accessToken = await chromeIdentity.getAccessToken();
   const response = await fetch(
     `${process.env.SERVER_URL}/translations/${email}?${params}`,
     {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${idToken}`,
-        "Client-Id": clientId,
+        Authorization: `Bearer ${accessToken}`,
       },
     },
   );
@@ -31,12 +31,13 @@ export const getTranslations = async (email, idToken, params, clientId) => {
   return data.data;
 };
 
-export const sendTranslations = async (email, idToken, translations) => {
+export const sendTranslations = async (email, translations) => {
+  const accessToken = await chromeIdentity.getAccessToken();
   const response = await fetch(`${process.env.SERVER_URL}/translations`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${idToken}`,
+      Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify({
       email,
@@ -113,19 +114,15 @@ export const getTranslationFromChromeStorage = (translations, originText) => {
   return translation;
 };
 
-export const getTranslationFromServer = async ({
-  clientId,
-  idToken,
-  originText,
-}) => {
+export const getTranslationFromServer = async ({ originText }) => {
+  const accessToken = await chromeIdentity.getAccessToken();
   const response = await fetch(
     `${process.env.SERVER_URL + WORDS + TRANSLATED}?words=${originText}`,
     {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${idToken}`,
-        "Client-Id": clientId,
+        Authorization: `Bearer ${accessToken}`,
       },
     },
   );
@@ -134,19 +131,14 @@ export const getTranslationFromServer = async ({
 };
 
 export const getTranslationFromGoogleCloudAPI = async (
-  { tokens: { refreshToken }, projectId, clientId, clientSecret },
+  { projectId },
   originText,
 ) => {
-  const { accessToken } = await refreshAndGetNewTokens(
-    clientId,
-    clientSecret,
-    refreshToken,
-  );
+  const accessToken = await chromeIdentity.getAccessToken();
+  const BASE_URL = "https://translation.googleapis.com/v3/projects/";
+  const URL_POST_FIX = "/locations/us-central1:translateText";
 
-  const baseUrl = "https://translation.googleapis.com/v3/projects/";
-  const urlPostFix = "/locations/us-central1:translateText";
-
-  const response = await fetch(baseUrl + projectId + urlPostFix, {
+  const response = await fetch(BASE_URL + projectId + URL_POST_FIX, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -165,18 +157,8 @@ export const getTranslationFromGoogleCloudAPI = async (
   return response.json();
 };
 
-export const getGlossaryFromGoogleCloudAPI = async ({
-  clientId,
-  clientSecret,
-  bucketId,
-  tokens: { refreshToken },
-}) => {
-  const { accessToken } = await refreshAndGetNewTokens(
-    clientId,
-    clientSecret,
-    refreshToken,
-  );
-
+export const getGlossaryFromGoogleCloudAPI = async ({ bucketId }) => {
+  const accessToken = await chromeIdentity.getAccessToken();
   const url = `https://storage.googleapis.com/storage/v1/b/${bucketId}/o/my-glossary.csv?alt=media`;
 
   const response = await fetch(url, {
@@ -186,16 +168,18 @@ export const getGlossaryFromGoogleCloudAPI = async ({
     },
   });
 
-  const data = await response.text();
+  const responseText = await response.text();
 
   if (
-    data === `No such object: ${bucketId}/my-glossary.csv` ||
-    data === "The specified bucket does not exist."
+    responseText === `No such object: ${bucketId}/my-glossary.csv` ||
+    responseText === "The specified bucket does not exist."
   ) {
     return null;
   }
 
-  const wordPairs = data.split("\r\n").map((wordPair) => wordPair.split(","));
+  const wordPairs = responseText
+    .split("\r\n")
+    .map((wordPair) => wordPair.split(","));
   const glossary = wordPairs.reduce(
     (prev, [origin, target]) => ({ ...prev, [origin]: target }),
     {},
@@ -205,16 +189,17 @@ export const getGlossaryFromGoogleCloudAPI = async ({
 };
 
 export const sendTranslationResult = async (
-  { email, tokens },
+  { email },
   currentTranslationResult,
 ) => {
+  const accessToken = await chromeIdentity.getAccessToken();
   const response = await fetch(
     `${process.env.SERVER_URL}${TRANSLATIONS}/${email}`,
     {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${tokens.idToken}`,
+        Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify(currentTranslationResult),
     },
@@ -272,12 +257,7 @@ export const googleTranslate = async (user, originText) => {
 };
 
 export const getTranslationResult = async (user, originText) => {
-  const {
-    clientId,
-    translations,
-    isServerOn,
-    tokens: { idToken },
-  } = user;
+  const { translations, isServerOn } = user;
   const localTranslation = await getTranslationFromChromeStorage(
     translations,
     originText,
@@ -292,11 +272,7 @@ export const getTranslationResult = async (user, originText) => {
   }
 
   if (isServerOn) {
-    const serverTranslation = await getTranslationFromServer({
-      clientId,
-      idToken,
-      originText,
-    });
+    const serverTranslation = await getTranslationFromServer({ originText });
 
     if (serverTranslation.result !== "ok") {
       throw serverTranslation.error.message;

@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useSelector } from "react-redux";
 
 import Title from "./shared/Title";
 import Container from "./shared/Container";
@@ -29,14 +28,12 @@ export default function OtherGlossaries() {
   const [currentPage, setCurrentPage] = useState(1);
   const [glossaries, setGlossaries] = useState([]);
 
-  const idToken = useSelector((state) => state.user.tokens.idToken);
   const observedElement = useRef();
 
   useEffect(() => {
     (async () => {
       try {
         const serverGlossaries = await getGlossaries(
-          idToken,
           currentPage,
           DEFAULT_LIMIT,
         );
@@ -46,7 +43,7 @@ export default function OtherGlossaries() {
         setError(err.message);
       }
     })();
-  }, [currentPage, idToken]);
+  }, [currentPage]);
 
   useEffect(() => {
     const handleObserver = (entries) => {
@@ -83,7 +80,6 @@ export default function OtherGlossaries() {
     }
 
     const serverGlossaries = await getGlossaries(
-      idToken,
       currentPage,
       DEFAULT_LIMIT,
       searchValue,

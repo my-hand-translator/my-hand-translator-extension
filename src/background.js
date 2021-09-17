@@ -1,3 +1,4 @@
+import chromeIdentity from "./utils/chromeIdentity";
 import chromeStore from "./utils/chromeStore";
 
 const injectTextSelectionComponent = () => {
@@ -40,4 +41,25 @@ chrome.tabs.onActivated.addListener(async () => {
   const { url: currentUrl } = await getCurrentTab();
 
   chrome.storage.sync.set({ currentUrl });
+});
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (chrome.runtime.lastError) {
+    sendResponse({ result: "error" });
+  }
+
+  if (message === "getAccessToken") {
+    (async () => {
+      try {
+        sendResponse({
+          result: "ok",
+          data: await chromeIdentity.getAccessToken(),
+        });
+      } catch (error) {
+        sendResponse({ result: "error" });
+      }
+    })();
+  }
+
+  return true;
 });

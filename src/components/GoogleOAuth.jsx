@@ -78,8 +78,6 @@ export default function GoogleOAuth({ handleOAuth }) {
       await chromeStore.set("userData", initialUserData);
       handleOAuth(true);
     } catch (error) {
-      console.log(error);
-
       setErrorMessage(
         `${error}, 현재 ${Object.entries(
           oAuth,
