@@ -124,7 +124,14 @@ export default function OtherGlossaries() {
         <div>
           {glossaries.length !== 0 &&
             glossaries.map((glossary) => {
-              return <OtherGlossary glossary={glossary}>test</OtherGlossary>;
+              return (
+                <OtherGlossary
+                  key={glossary.glossary.updatedAt}
+                  glossary={glossary}
+                >
+                  test
+                </OtherGlossary>
+              );
             })}
         </div>
 
