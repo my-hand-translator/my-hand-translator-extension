@@ -4,7 +4,7 @@ const ContainerStyled = styled("div", {
   display: "flex",
   padding: "10px",
   borderRadius: "10px",
-  backgroundColor: "white",
+  backgroundColor: "#FBFBFB",
 
   variants: {
     flex: {
@@ -57,6 +57,10 @@ const ContainerStyled = styled("div", {
       black: {
         border: "1px solid $black",
       },
+    },
+
+    pos: {
+      relative: { position: "relative" },
     },
   },
 });
