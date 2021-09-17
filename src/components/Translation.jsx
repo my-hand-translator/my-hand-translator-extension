@@ -5,14 +5,14 @@ import { styled } from "../config/stitches.config";
 
 import SubTitle from "./shared/SubTitle";
 import ContainerStyled from "./shared/Container";
-import Button from "./shared/Button";
+import { TransitionButton } from "./shared/TransitionButton";
 
 const TranslationContainer = styled(ContainerStyled, {});
 
 const TextBox = styled("p", {
   color: "$black",
   padding: "10px",
-  fontSize: "15px",
+  fontSize: "20px",
   borderRadius: "10px",
 
   variants: {
@@ -37,9 +37,7 @@ const TextBox = styled("p", {
 });
 
 const Textarea = styled("textarea", {
-  minHeight: "150px",
-  minWidth: "300px",
-  maxWidth: "500px",
+  width: "auto",
   padding: "10px",
   overflow: "auto",
   fontSize: "20px",
@@ -55,6 +53,21 @@ const Textarea = styled("textarea", {
   },
 });
 
+const OriginWord = styled("span", {
+  borderRadius: "3px",
+  padding: "1px 3px",
+  backgroundColor: "rgb(224 240 255)",
+});
+
+const TargetWord = styled(OriginWord, {
+  backgroundColor: "#f6f6f6",
+});
+
+const WordPair = styled("div", {
+  display: "flex",
+  justifyContent: "space-between",
+});
+
 export default function Translation({
   handleClickGoogleTranslate,
   handleChangeTextarea,
@@ -66,9 +79,20 @@ export default function Translation({
   const glossaryEntries = Object.entries(glossary || {});
 
   return (
-    <TranslationContainer flex="column" border="black">
-      <ContainerStyled flex="column">
-        <SubTitle>번역할 문장</SubTitle>
+    <TranslationContainer
+      flex="column"
+      border="black"
+      css={{
+        marginTop: "20px",
+        marginBottom: "20px",
+        border: "none",
+        padding: 0,
+      }}
+    >
+      <ContainerStyled flex="column" css={{ padding: 0 }}>
+        <SubTitle fontSize="middle" css={{ color: "$blue" }}>
+          번역할 문장
+        </SubTitle>
 
         <Textarea
           type="text"
@@ -81,13 +105,13 @@ export default function Translation({
         </Textarea>
       </ContainerStyled>
 
-      <ContainerStyled flex="column">
-        <SubTitle>
+      <ContainerStyled flex="column" css={{ padding: 0 }}>
+        <SubTitle fontSize="middle" css={{ color: "$blue" }}>
           번역 결과{" "}
           {notification && notification !== "구글 API" && (
-            <Button onClick={handleClickGoogleTranslate}>
+            <TransitionButton onClick={handleClickGoogleTranslate}>
               내 용어집으로 번역하기
-            </Button>
+            </TransitionButton>
           )}
         </SubTitle>
         {notification && (
@@ -96,16 +120,21 @@ export default function Translation({
           </SubTitle>
         )}
 
-        <TextBox border="black">
+        <TextBox fontSize="middle" border="black">
           {translation || "번역 결과가 표시됩니다."}
         </TextBox>
 
-        <SubTitle>사용한 용어집</SubTitle>
-        <ul>
+        {glossaryEntries.length > 0 && <SubTitle>사용한 용어집</SubTitle>}
+
+        <ContainerStyled flex="column" css={{ padding: 0, gap: "10px" }}>
           {glossaryEntries.map(([origin, target]) => (
-            <li key={origin}>{`[${origin}]을 [${target}]로 번역`}</li>
+            <WordPair key={origin}>
+              <OriginWord>{origin}</OriginWord>
+              <div>{"---->"}</div>
+              <TargetWord>{target}</TargetWord>
+            </WordPair>
           ))}
-        </ul>
+        </ContainerStyled>
       </ContainerStyled>
     </TranslationContainer>
   );

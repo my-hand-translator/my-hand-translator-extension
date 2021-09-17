@@ -15,6 +15,7 @@ const PageTranslationContainer = styled(ContainerStyled, {
   backgroundColor: "transparent",
   zIndex: "9999",
   maxWidth: "500px",
+  padding: "10px",
 });
 
 const initialBoxPosition = {
@@ -124,7 +125,7 @@ export default function TextSelection() {
     user && (
       <PageTranslationContainer ref={boxRef} css={boxPosition} flex="column">
         {isBoxVisible ? (
-          <>
+          <ContainerStyled css={{ border: "1px solid $blue" }}>
             {errorMessage && (
               <ErrorStyled>{JSON.stringify(errorMessage)}</ErrorStyled>
             )}
@@ -134,7 +135,7 @@ export default function TextSelection() {
               handleClickGoogleTranslate={handleClickGoogleTranslate}
               isOnWebPage
             />
-          </>
+          </ContainerStyled>
         ) : (
           textSelected &&
           isSelectionEnd && (

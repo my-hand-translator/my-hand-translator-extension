@@ -24,7 +24,7 @@ function Header() {
             height: "80px",
           }}
         >
-          <div className="logo">My Hand</div>
+          <div className="logo">My Hand Translator</div>
 
           <Nav>
             <NavLink to={MY_GLOSSARY} activeClassName="selected">
