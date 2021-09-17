@@ -25,15 +25,24 @@ export * from "@testing-library/react";
 
 const user = {
   clientId: "950605617290-fja07ouuq9tqihnksf0ac4jd50kpu3q4.apps.googleusercontent.com",
+  clientSecret: "FW9CBr-RnGTkZY5GvUlf1rIy",
+  projectId: "translate-324702",
   translations: [{
     nanoId: "qWYBIfLPMsjP1LHNRqlFW",
     origin: "react",
     translated: "리액트",
     url: "vanilla"
   }],
+  glossary: {
+    react: "리액트"
+  },
+  glossaryId: "6141bd1c2a11e5b51320bac1",
   isServerOn: false,
+  name: "aidencoders",
   tokens: {
-    idToken: "asdnoifqjeirnqoer"
+    idToken: "asdnoifqjeirnqoer",
+    accessToken: "ya29.a0ARr",
+    refreshToken: "1//0elaLJegEVwTVCgYIARA",
   },
   email: "aidencoders@gmail.com"
 };
