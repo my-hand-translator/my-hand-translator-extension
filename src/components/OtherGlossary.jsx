@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
+import { RiBook2Fill, RiFileWord2Line } from "react-icons/ri";
 
 import Container from "./shared/Container";
 
@@ -16,6 +17,14 @@ const GlossaryContainer = styled(Container, {
   "@tabMedium": {
     flexDirection: "column",
   },
+
+  "& span": {
+    marginLeft: "5px",
+  },
+});
+
+const GlossaryContent = styled(Container, {
+  flex: "1 1 50%",
 });
 
 const LinkStyled = styled(Link, {
@@ -31,16 +40,19 @@ export default function OtherGlossary({ glossary }) {
     glossary: { keywords },
   } = glossary;
 
+  const username = glossary.userEmail.split("@")[0];
+
   return (
     <LinkStyled to={`${OTHER_GLOSSARIES}/${glossary.userEmail}`}>
-      <GlossaryContainer justify="spaceAround">
-        <Container justify="center">
-          <span>{glossary.userEmail}의 용어집</span>
-        </Container>
+      <GlossaryContainer justify="spaceBetween">
+        <GlossaryContent justify="start" align="center">
+          <RiBook2Fill size="24px" color="#F2B988" />
+          <span>{username}</span>
+        </GlossaryContent>
 
-        <Container justify="center">
+        <GlossaryContent justify="start" align="center">
+          <RiFileWord2Line size="24px" color="#1D8FF2" />
           <span>
-            Keywords:{" "}
             {keywords.length !== 0 &&
               keywords.map((keyword, index) => {
                 return (
@@ -51,7 +63,7 @@ export default function OtherGlossary({ glossary }) {
                 );
               })}
           </span>
-        </Container>
+        </GlossaryContent>
       </GlossaryContainer>
     </LinkStyled>
   );

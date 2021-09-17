@@ -26,8 +26,8 @@ function GlossaryList({ glossaries, buttonColor, buttonText, onButtonClick }) {
               <Button
                 size="small"
                 type="button"
-                borderColor="red"
-                fontColor="red"
+                borderColor={buttonText === "추가" ? "" : "red"}
+                fontColor={buttonText === "추가" ? "white" : "red"}
                 bgColor={buttonColor === "primary" ? "lightBlue" : "white"}
                 onClick={() => onButtonClick(text, glossaries[text])}
               >

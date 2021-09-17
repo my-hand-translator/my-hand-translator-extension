@@ -34,6 +34,10 @@ const initWordsToAdd = {
   translation: "",
 };
 
+const DivStyled = styled(ContainerStyled, {
+  flex: "1 1 80%",
+});
+
 function EditGlossary() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMassage, setErrorMassage] = useState(null);
@@ -169,7 +173,9 @@ function EditGlossary() {
         </Button>
       </ContainerStyled>
 
-      <SubTitle>좌측 단어는 우측 단어로 번역됩니다.</SubTitle>
+      <ContainerStyled>
+        <SubTitle>좌측 단어는 우측 단어로 번역됩니다.</SubTitle>
+      </ContainerStyled>
 
       <ErrorStyled css={{ height: "16px" }}>{errorMassage}</ErrorStyled>
 
