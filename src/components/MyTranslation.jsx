@@ -71,7 +71,7 @@ function MyTranslation({ translation, onClick }) {
         <div>
           <Container justify="spaceBetween" align="center">
             <HiTranslate size="24px" color="#1A6DD9" />
-            <ButtonStyled type="button" onClick={onClick}>
+            <ButtonStyled type="button" onClick={() => onClick(translation)}>
               <FaMinusCircle size="24px" color="#EA4435" />
             </ButtonStyled>
           </Container>

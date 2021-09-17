@@ -13,6 +13,7 @@ import chromeStore from "../utils/chromeStore";
 import debounce from "../utils/utils";
 import {
   createTranslationParam,
+  deleteTranslations,
   getTranslations,
   sendTranslations,
 } from "../services/translationService";
@@ -94,16 +95,41 @@ function MyTranslations() {
   };
 
   const handleDeleteButton = async (translation) => {
-    const filteredTranslations = translations.filter((translationToFilter) => {
-      return translationToFilter.nanoId !== translation.nanoId;
-    });
+    const { _id: translationId } = translation;
+    if (!isServerOn) {
+      const filteredTranslations = storageTranslations.filter(
+        (translationToFilter) => {
+          return translationToFilter.nanoId !== translation.nanoId;
+        },
+      );
 
-    chromeStore.set("userData", {
-      ...user,
-      translations: filteredTranslations,
-    });
+      chromeStore.set("userData", {
+        ...user,
+        translations: filteredTranslations,
+      });
 
-    setTranslations(filteredTranslations);
+      return setTranslations(filteredTranslations);
+    }
+
+    try {
+      const data = await deleteTranslations(translationId);
+
+      if (data.result !== "ok") {
+        throw data;
+      }
+
+      const filteredTranslations = translations.filter(
+        (translationToFilter) => {
+          return translationToFilter.nanoId !== translation.nanoId;
+        },
+      );
+
+      setTranslations(filteredTranslations);
+    } catch (err) {
+      setError(err);
+    }
+
+    return null;
   };
 
   const handleSearchButtonClick = () => {

@@ -9,6 +9,23 @@ const DECIMAL_POINT = 2;
 const PERCENTAGE = 100;
 const SIMILARITY = 95;
 
+export const deleteTranslations = async (translationId) => {
+  const accessToken = await chromeIdentity.getAccessToken();
+
+  const response = await fetch(
+    `${process.env.SERVER_URL}/translations/${translationId}`,
+    {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+  );
+
+  return response.json();
+};
+
 export const getTranslations = async (email, params) => {
   const accessToken = await chromeIdentity.getAccessToken();
   const response = await fetch(
