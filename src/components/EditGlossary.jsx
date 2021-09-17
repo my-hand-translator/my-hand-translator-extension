@@ -167,7 +167,9 @@ function EditGlossary() {
   return (
     <TabContainer>
       <ContainerStyled justify="spaceBetween">
-        <Title>{user.glossary ? "용어집 편집" : "용어집 생성"}</Title>
+        <ContainerStyled justify="center" align="center">
+          <Title>{user.glossary ? "용어집 편집" : "용어집 생성"}</Title>
+        </ContainerStyled>
         <Button size="medium" bgColor="blue" onClick={handleEditGlossary}>
           제출
         </Button>

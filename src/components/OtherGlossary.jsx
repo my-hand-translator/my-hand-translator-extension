@@ -52,17 +52,19 @@ export default function OtherGlossary({ glossary }) {
 
         <GlossaryContent justify="start" align="center">
           <RiFileWord2Line size="24px" color="#1D8FF2" />
-          <span>
-            {keywords.length !== 0 &&
-              keywords.map((keyword, index) => {
-                return (
-                  <span key={keyword}>
-                    {keyword}
-                    {index === keywords.length - 1 ? "" : ", "}
-                  </span>
-                );
-              })}
-          </span>
+          <Container justify="center" align="center">
+            <span>
+              {keywords.length !== 0 &&
+                keywords.map((keyword, index) => {
+                  return (
+                    <span key={keyword}>
+                      {keyword}
+                      {index === keywords.length - 1 ? "" : ", "}
+                    </span>
+                  );
+                })}
+            </span>
+          </Container>
         </GlossaryContent>
       </GlossaryContainer>
     </LinkStyled>

@@ -22,6 +22,10 @@ const SubTitle = styled("h3", {
     align: {
       center: { textAlign: "center" },
     },
+
+    bgColor: {
+      aqua: { backgroundColor: "aqua" },
+    },
   },
 });
 
