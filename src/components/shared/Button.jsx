@@ -7,9 +7,8 @@ const Button = styled("button", {
   color: "white",
   fontWeight: "bold",
   fontSize: "1rem",
-  padding: "5px",
 
-  backgroundColor: "white",
+  backgroundColor: "$lightBlue",
   border: "1px solid rgb(241 243 244)",
 
   boxShadow: "0 2px 3px rgba(0, 0, 0, 0.2)",
