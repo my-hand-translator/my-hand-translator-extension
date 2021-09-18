@@ -112,13 +112,15 @@ Signup.propTypes = {
     name: PropTypes.string,
     projectId: PropTypes.string.isRequired,
     signed: PropTypes.string,
-    translations: PropTypes.arrayOf({
-      origin: PropTypes.string.isRequired,
-      translated: PropTypes.string.isRequired,
-      url: PropTypes.string.isRequired,
-      glossary: PropTypes.objectOf(PropTypes.string),
-      createdAt: new Date().toISOString(),
-      nanoId: PropTypes.string.isRequired,
-    }),
+    translations: PropTypes.arrayOf(
+      PropTypes.shape({
+        origin: PropTypes.string.isRequired,
+        translated: PropTypes.string.isRequired,
+        url: PropTypes.string.isRequired,
+        glossary: PropTypes.objectOf(PropTypes.string),
+        createdAt: PropTypes.string.isRequired,
+        nanoId: PropTypes.string.isRequired,
+      }),
+    ),
   }).isRequired,
 };
