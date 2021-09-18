@@ -12,6 +12,7 @@ const Button = styled("button", {
   backgroundColor: "white",
   border: "1px solid rgb(241 243 244)",
 
+  boxShadow: "0 2px 3px rgba(0, 0, 0, 0.2)",
   outline: "none",
   borderRadius: "0.5em",
 
@@ -42,7 +43,7 @@ const Button = styled("button", {
       blue: { backgroundColor: "$blue" },
       lightBlue: { backgroundColor: "$lightBlue" },
       apricot: { backgroundColor: "$apricot" },
-      white: { backgroundColor: "$white" },
+      white: { backgroundColor: "#FFFFFF" },
       red: { backgroundColor: "$red" },
     },
 
@@ -51,11 +52,20 @@ const Button = styled("button", {
       lightBlue: { color: "$lightBlue" },
       apricot: { color: "$apricot" },
       white: { color: "$white" },
+      red: { color: "$red" },
     },
 
     active: {
       true: { background: "$lightBlue" },
       false: { background: "$black" },
+    },
+
+    borderColor: {
+      red: { border: "1px solid $red" },
+    },
+
+    pos: {
+      absolute: { position: "absolute" },
     },
   },
 });

@@ -5,6 +5,7 @@ const TabContainer = styled("div", {
   margin: "auto",
   paddingLeft: "30px",
   paddingRight: "30px",
+  backgroundColor: "#FBFBFB",
 });
 
 export default TabContainer;

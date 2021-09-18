@@ -5,7 +5,7 @@ import { styled } from "@stitches/react";
 
 import GlossaryList from "./GlossaryList";
 import Button from "./shared/Button";
-import ContainerStyled from "./shared/Container";
+import Container from "./shared/Container";
 import TabContainer from "./shared/TabContainer";
 import Title from "./shared/Title";
 import SubTitle from "./shared/SubTitle";
@@ -138,8 +138,10 @@ function DetailOtherGlossary() {
 
   return (
     <TabContainer>
-      <ContainerStyled justify="spaceBetween">
-        <Title>다른 사람의 용어집</Title>
+      <Container justify="spaceBetween">
+        <Container justify="center" align="center">
+          <Title>다른 사람의 용어집</Title>
+        </Container>
         <div>
           <Button
             bgColor="blue"
@@ -158,11 +160,11 @@ function DetailOtherGlossary() {
             적용하기
           </Button>
         </div>
-      </ContainerStyled>
+      </Container>
 
       <ErrorStyled css={{ height: "16px" }}>{errorMassage}</ErrorStyled>
 
-      <ContainerStyled justify="spaceBetween">
+      <Container justify="spaceBetween">
         <GlossaryListWrap>
           <SubTitle align="center">내 용어집</SubTitle>
           <GlossaryList
@@ -181,7 +183,7 @@ function DetailOtherGlossary() {
             onButtonClick={handleAddGlossary}
           />
         </GlossaryListWrap>
-      </ContainerStyled>
+      </Container>
     </TabContainer>
   );
 }

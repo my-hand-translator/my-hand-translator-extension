@@ -25,7 +25,10 @@ function GlossaryList({ glossaries, buttonColor, buttonText, onButtonClick }) {
             <Col grid="col1">
               <Button
                 size="small"
-                bgColor={buttonColor === "primary" ? "lightBlue" : "red"}
+                type="button"
+                borderColor={buttonText === "추가" ? "" : "red"}
+                fontColor={buttonText === "추가" ? "white" : "red"}
+                bgColor={buttonColor === "primary" ? "lightBlue" : "white"}
                 onClick={() => onButtonClick(text, glossaries[text])}
               >
                 {buttonText}

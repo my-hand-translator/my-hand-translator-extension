@@ -7,11 +7,14 @@ const reset = {
       fontSize: "100%",
       font: "inherit",
       verticalAlign: "baseline",
+      backgroundColor: "#FBFBFB",
+      textDecoration: "none",
     },
 
   "article, aside, details, figcaption, figure, footer, header, hgroup, main, menu, nav, section":
     {
       display: "block",
+      backgroundColor: "#FBFBFB",
     },
 
   "*[hidden]": {

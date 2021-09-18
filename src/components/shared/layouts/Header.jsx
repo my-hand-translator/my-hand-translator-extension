@@ -10,6 +10,7 @@ import {
 
 import ContainerStyled from "../Container";
 import TabContainer from "../TabContainer";
+import Title from "../Title";
 
 function Header() {
   return (
@@ -24,7 +25,7 @@ function Header() {
             height: "80px",
           }}
         >
-          <div className="logo">My Hand Translator</div>
+          <Title>My Hand Translator</Title>
 
           <Nav>
             <NavLink to={MY_GLOSSARY} activeClassName="selected">

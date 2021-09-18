@@ -148,7 +148,7 @@ function MyTranslations() {
           </FormContent>
         </Container>
 
-        <div className="translation-list">
+        <div>
           {translations.length !== 0 &&
             translations.map((translation) => {
               return (
