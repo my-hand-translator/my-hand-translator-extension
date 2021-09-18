@@ -1,8 +1,6 @@
 import { styled } from "../../config/stitches.config";
 
 const Button = styled("button", {
-  border: "none",
-
   wordBreak: "keep-all",
   overflowWrap: "break-word",
 
@@ -11,9 +9,9 @@ const Button = styled("button", {
   fontSize: "1rem",
   padding: "5px",
 
-  backgroundColor: "$lightBlue",
+  backgroundColor: "white",
+  border: "1px solid rgb(241 243 244)",
 
-  boxShadow: "0 2px 10px rgba(0, 0, 0, 0.2)",
   outline: "none",
   borderRadius: "0.5em",
 

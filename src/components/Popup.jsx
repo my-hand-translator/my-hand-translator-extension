@@ -4,7 +4,6 @@ import { styled } from "../config/stitches.config";
 
 import ContainerStyled from "./shared/Container";
 import ErrorStyled from "./shared/Error";
-import Button from "./shared/Button";
 import Title from "./shared/Title";
 
 import Signup from "./Signup";
@@ -19,13 +18,15 @@ import {
 } from "../services/translationService";
 import chromeStore from "../utils/chromeStore";
 import { SIGNING_STATUS } from "../constants/user";
+import { Button, TransitionButton } from "./shared/TransitionButton";
 
 const TAB_BASE_URL = `chrome-extension://${chrome.runtime.id}/options.html#/`;
 
 const PopupContainer = styled(ContainerStyled, {
-  maxWidth: "500px",
-  width: "max-content",
-  height: "max-content",
+  position: "relative",
+  width: "550px",
+  color: "$black",
+  padding: 0,
 });
 
 export default function Popup() {
@@ -153,46 +154,60 @@ export default function Popup() {
 
   return (
     <PopupContainer flex="column">
-      <Title align="center">내손번역</Title>
+      <Title
+        css={{
+          width: "100%",
+          fontSize: "30px",
+          fontFamily: "'Syncopate', sans-serif",
+          color: "white",
+          backgroundColor: "$blue",
+          lineHeight: "50px",
+        }}
+        align="center"
+      >
+        My hand translator
+      </Title>
 
       {errorMessage && <ErrorStyled>{errorMessage}</ErrorStyled>}
 
       {isLoading && "Loading ..."}
 
       {!isLoading && email && projectId && !hasGlossary && (
-        <Button
-          name="my-glossary"
-          bgColor="lightBlue"
-          onClick={handleClickOptionButton}
-        >
+        <Button name="my-glossary" onClick={handleClickOptionButton}>
           내 용어집 생성하기
         </Button>
       )}
 
       {!isLoading && user?.glossary && (
         <ContainerStyled flex="column">
-          <ContainerStyled flex="row" justify="spaceBetween">
-            <Button
-              bgColor="blue"
-              onClick={() => handleClickTranslate(getTranslationResult)}
-            >
-              번역하기
-            </Button>
-
-            <Button
-              onClick={handleToggleServerConnection}
-              bgColor={isServerOn ? "blue" : "apricot"}
-            >
-              {isServerOn ? "서버 연결 끊기" : "서버 연결"}
-            </Button>
-          </ContainerStyled>
-
           {!isLoading &&
           isServerOn &&
           user?.signed === SIGNING_STATUS.UNDERWAY ? (
             <Signup handleSignupResult={handleSignupResult} user={user} />
           ) : (
-            <>
+            <ContainerStyled
+              flex="column"
+              css={{ margin: "5px 0px 5px 0px", padding: 0, border: "none" }}
+            >
+              <ContainerStyled
+                css={{ padding: 0 }}
+                flex="row"
+                justify="spaceBetween"
+              >
+                <TransitionButton
+                  onClick={() => handleClickTranslate(getTranslationResult)}
+                >
+                  번역하기
+                </TransitionButton>
+
+                <Button
+                  onClick={handleToggleServerConnection}
+                  status={isServerOn ? "on" : "off"}
+                >
+                  {isServerOn ? "서버 연결 끊기" : "서버 연결"}
+                </Button>
+              </ContainerStyled>
+
               <Translation
                 originText={originText}
                 translationResult={translationResult}
@@ -203,15 +218,11 @@ export default function Popup() {
               />
 
               <ContainerStyled
-                css={{ gap: "30px" }}
+                css={{ gap: "30px", padding: "0" }}
                 flex="row"
                 justify="spaceBetween"
               >
-                <Button
-                  name="my-glossary"
-                  bgColor="lightBlue"
-                  onClick={handleClickOptionButton}
-                >
+                <Button name="my-glossary" onClick={handleClickOptionButton}>
                   내 용어집 편집하기
                 </Button>
 
@@ -226,14 +237,13 @@ export default function Popup() {
                 {isServerOn && (
                   <Button
                     name="other-glossaries"
-                    bgColor="lightBlue"
                     onClick={handleClickOptionButton}
                   >
                     다른 사람 용어집 구경하기
                   </Button>
                 )}
               </ContainerStyled>
-            </>
+            </ContainerStyled>
           )}
         </ContainerStyled>
       )}

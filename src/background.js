@@ -28,6 +28,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
         target: { tabId },
         files: ["./textSelection.bundle.js"],
       });
+
       const { url: currentUrl } = await getCurrentTab();
 
       await chromeStore.set("currentUrl", currentUrl);

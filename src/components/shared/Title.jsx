@@ -4,7 +4,6 @@ const Title = styled("h1", {
   color: "$black",
   fontSize: "20px",
   fontWeight: "800",
-  margin: "10px",
 
   variants: {
     color: {
