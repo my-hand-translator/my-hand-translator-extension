@@ -24,6 +24,25 @@ const GlossaryListWrap = styled("div", {
   flex: 1,
 });
 
+const SubTitleStyled = styled(SubTitle, {
+  display: "inline-block",
+  padding: "10px",
+  backgroundColor: "#D5D9DC",
+  color: "white",
+});
+
+const Divide = styled("div", {
+  variants: {
+    pad: {
+      left: { paddingRight: "20px" },
+      right: {
+        paddingRight: "20px",
+        borderRight: "2px solid #e5e5e5",
+      },
+    },
+  },
+});
+
 function DetailOtherGlossary() {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMassage, setErrorMassage] = useState(null);
@@ -166,22 +185,32 @@ function DetailOtherGlossary() {
 
       <Container justify="spaceBetween">
         <GlossaryListWrap>
-          <SubTitle align="center">내 용어집</SubTitle>
-          <GlossaryList
-            glossaries={myGlossary}
-            buttonText="삭제"
-            buttonColor="warning"
-            onButtonClick={handleDeleteGlossary}
-          />
+          <Container justify="center" align="center">
+            <SubTitleStyled align="center">내 용어집</SubTitleStyled>
+          </Container>
+
+          <Divide pad="right">
+            <GlossaryList
+              glossaries={myGlossary}
+              buttonText="삭제"
+              buttonColor="warning"
+              onButtonClick={handleDeleteGlossary}
+            />
+          </Divide>
         </GlossaryListWrap>
 
         <GlossaryListWrap>
-          <SubTitle align="center">{userId}의 용어집</SubTitle>
-          <GlossaryList
-            glossaries={otherGlossary}
-            buttonText="추가"
-            onButtonClick={handleAddGlossary}
-          />
+          <Container justify="center" align="center">
+            <SubTitleStyled align="center">{userId}의 용어집</SubTitleStyled>
+          </Container>
+
+          <Divide pad="left">
+            <GlossaryList
+              glossaries={otherGlossary}
+              buttonText="추가"
+              onButtonClick={handleAddGlossary}
+            />
+          </Divide>
         </GlossaryListWrap>
       </Container>
     </TabContainer>
