@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { styled } from "../../../config/stitches.config";
 
@@ -7,12 +7,23 @@ import {
   MY_TRANSLATIONS,
   OTHER_GLOSSARIES,
 } from "../../../constants/url";
+import chromeStore from "../../../utils/chromeStore";
 
 import ContainerStyled from "../Container";
 import TabContainer from "../TabContainer";
 import Title from "../Title";
 
 function Header() {
+  const [userData, setUserData] = useState();
+
+  useEffect(() => {
+    (async () => {
+      const user = await chromeStore.get("userData");
+
+      setUserData(user);
+    })();
+  }, []);
+
   return (
     <header>
       <TabContainer justify="spaceBetween">
@@ -34,9 +45,11 @@ function Header() {
             <NavLink to={MY_TRANSLATIONS} activeClassName="selected">
               내 번역 기록
             </NavLink>
-            <NavLink to={OTHER_GLOSSARIES} activeClassName="selected">
-              다른 사람 용어집
-            </NavLink>
+            {userData?.isServerOn && (
+              <NavLink to={OTHER_GLOSSARIES} activeClassName="selected">
+                다른 사람 용어집
+              </NavLink>
+            )}
           </Nav>
         </ContainerStyled>
       </TabContainer>

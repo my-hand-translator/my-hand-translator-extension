@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 
+import { useSelector } from "react-redux";
 import Title from "./shared/Title";
 import Container from "./shared/Container";
 import ErrorStyled from "./shared/Error";
@@ -27,8 +28,18 @@ export default function OtherGlossaries() {
   const [searchValue, setSearchValue] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [glossaries, setGlossaries] = useState([]);
+  const [hasServiceAccess, setHasServiceAccess] = useState(null);
 
+  const user = useSelector((state) => state.user);
   const observedElement = useRef();
+
+  useEffect(() => {
+    (async () => {
+      const { isServerOn } = user;
+
+      setHasServiceAccess(isServerOn);
+    })();
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -88,6 +99,14 @@ export default function OtherGlossaries() {
     setGlossaries(serverGlossaries);
     return setIsSearched(true);
   };
+
+  if (!hasServiceAccess) {
+    return (
+      <TabContainer>
+        <ErrorStyled>해당 서비스는 서버 연결이 필요합니다.</ErrorStyled>
+      </TabContainer>
+    );
+  }
 
   return (
     <>
