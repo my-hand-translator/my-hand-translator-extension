@@ -9,7 +9,7 @@ const Button = styled("button", {
   fontSize: "1rem",
 
   backgroundColor: "$lightBlue",
-  border: "1px solid rgb(241 243 244)",
+  border: "none",
 
   boxShadow: "0 2px 3px rgba(0, 0, 0, 0.2)",
   outline: "none",

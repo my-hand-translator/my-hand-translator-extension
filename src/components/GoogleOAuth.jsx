@@ -11,11 +11,11 @@ import chromeIdentity from "../utils/chromeIdentity";
 import chromeStore from "../utils/chromeStore";
 
 const LoginStyled = styled("div", {
-  width: "300px",
   display: "flex",
   justifyContent: "center",
-  alignItems: "stretch",
+  alignItems: "center",
   flexDirection: "column",
+  margin: "20px 0",
   gap: "15px",
 });
 
@@ -110,6 +110,9 @@ export default function GoogleOAuth({ handleOAuth }) {
         active={isOAuthAvailable}
         type="button"
         onClick={handleClickGoogleOAuth}
+        css={{
+          padding: "10px 15px",
+        }}
       >
         구글로 OAuth2 인증 받기
       </Button>
