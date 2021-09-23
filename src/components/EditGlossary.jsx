@@ -91,11 +91,11 @@ function EditGlossary() {
     const { text, translation } = wordsToAdd;
 
     if (!text || !text.trim()) {
-      return setErrorMassage("원문 단어을 입력해 주세요");
+      return setErrorMassage("원문 단어를 입력해 주세요.");
     }
 
     if (!translation || !translation.trim()) {
-      return setErrorMassage("번역 할 단어를 입력해 주세요");
+      return setErrorMassage("번역 할 단어를 입력해 주세요.");
     }
 
     if (glossary[text] === translation) {
@@ -190,6 +190,7 @@ function EditGlossary() {
               name="text"
               value={wordsToAdd.text}
               onChange={handleWordsChange}
+              placeholder="text"
             />
           </Col>
           <p>
@@ -201,6 +202,7 @@ function EditGlossary() {
               name="translation"
               value={wordsToAdd.translation}
               onChange={handleWordsChange}
+              placeholder="translation"
             />
           </Col>
           <Col grid="col1">

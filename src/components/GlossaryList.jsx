@@ -11,7 +11,12 @@ function GlossaryList({ glossaries, buttonColor, buttonText, onButtonClick }) {
     <>
       {Object.keys(glossaries).map((text) => {
         return (
-          <ContainerStyled id={text} justify="spaceEvenly" align="itemCenter">
+          <ContainerStyled
+            key={text}
+            id={text}
+            justify="spaceEvenly"
+            align="itemCenter"
+          >
             <Col name="text" grid="col2">
               {text}
             </Col>
