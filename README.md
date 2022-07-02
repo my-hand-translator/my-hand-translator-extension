@@ -1,7 +1,6 @@
 # 내손번역 My Hand Translator
 
 https://user-images.githubusercontent.com/37020415/143677480-966a180d-df05-40a1-ae4e-ab43d4f1f74d.mp4
-
 [내손번역](https://my-hand-translator.github.io/)은 자신만의 용어집으로 텍스트 번역을 할 수 있는 크롬 확장 프로그램입니다.
 - [Google Cloud Translation API](https://cloud.google.com/translate/)를 사용하여 월 50만 자를 무료로 번역할 수 있습니다.  
 - 확장 프로그램 안과 일반 웹페이지에서 영문을 번역할 수 있습니다.
